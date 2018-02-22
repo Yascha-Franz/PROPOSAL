@@ -207,6 +207,12 @@ ADD_EXECUTABLE(example
 SET_TARGET_PROPERTIES(example PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -O2 -g -Wall -Wextra -Wnarrowing -Wpedantic -fdiagnostics-show-option")
 TARGET_LINK_LIBRARIES(example PROPOSAL)
 
+ADD_EXECUTABLE(integral_bug
+	private/test/integral_bug.cxx
+)
+SET_TARGET_PROPERTIES(integral_bug PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -O2 -g -Wall -Wextra -Wnarrowing -Wpedantic -fdiagnostics-show-option")
+TARGET_LINK_LIBRARIES(integral_bug PROPOSAL)
+
 IF(ADD_PERFORMANCE_TEST)
 	ADD_EXECUTABLE(performance_test
 			private/test/performance_test.cxx
