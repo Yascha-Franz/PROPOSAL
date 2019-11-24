@@ -11,3 +11,4 @@ cmake_uninstall.cmake
 *.pdf
 *.swp
 pybind11/
+log4cplus/
