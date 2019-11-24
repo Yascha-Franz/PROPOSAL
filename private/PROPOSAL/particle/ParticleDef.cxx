@@ -10,6 +10,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <map>
 
 #include "PROPOSAL/Constants.h"
 #include "PROPOSAL/decay/LeptonicDecayChannel.h"
@@ -65,6 +66,37 @@ const HardComponentTables::VecType HardComponentTables::TauTable = {
 const HardComponentTables::VecType HardComponentTables::EmptyTable;
 
 /******************************************************************************
+ *                                ParticleMap                                 *
+ ******************************************************************************/
+
+std::map<int,const ParticleDef&> ParticleDefs;
+
+void makeParticleDefs(){
+    ParticleDefs.insert(std::make_pair<int,const ParticleDef&>(11,  EMinusDef::Get()));
+    ParticleDefs.insert(std::make_pair<int,const ParticleDef&>(-11, EPlusDef::Get()));
+
+    ParticleDefs.insert(std::make_pair<int,const ParticleDef&>(12,  NuEDef::Get()));
+    ParticleDefs.insert(std::make_pair<int,const ParticleDef&>(-12, NuEBarDef::Get()));
+
+    ParticleDefs.insert(std::make_pair<int,const ParticleDef&>(13,  MuMinusDef::Get()));
+    ParticleDefs.insert(std::make_pair<int,const ParticleDef&>(-13, MuPlusDef::Get()));
+
+    ParticleDefs.insert(std::make_pair<int,const ParticleDef&>(14,  NuMuDef::Get()));
+    ParticleDefs.insert(std::make_pair<int,const ParticleDef&>(-14, NuMuBarDef::Get()));
+
+    ParticleDefs.insert(std::make_pair<int,const ParticleDef&>(15,  TauMinusDef::Get()));
+    ParticleDefs.insert(std::make_pair<int,const ParticleDef&>(-15, TauPlusDef::Get()));
+
+    ParticleDefs.insert(std::make_pair<int,const ParticleDef&>(16,  NuTauDef::Get()));
+    ParticleDefs.insert(std::make_pair<int,const ParticleDef&>(-16, NuTauBarDef::Get()));
+
+    ParticleDefs.insert(std::make_pair<int,const ParticleDef&>(21,  GammaDef::Get()));
+}
+
+
+//ParticleDef* e = ParticleDefs.find(11)->second;
+
+/******************************************************************************
  *                                ParticleDef                                 *
  ******************************************************************************/
 
@@ -107,7 +139,7 @@ ParticleDef::ParticleDef()
     , charge(0.0)
     , hard_component_table(HardComponentTables::EmptyTable)
     , decay_table()
-    , weak_partner(nullptr)
+    , weak_partner(0)
 {
 }
 
@@ -125,7 +157,7 @@ ParticleDef::ParticleDef(std::string name,
     , charge(charge)
     , hard_component_table(table)
     , decay_table(decay_table)
-    , weak_partner(nullptr)
+    , weak_partner(0)
 {
 }
 
@@ -136,7 +168,7 @@ ParticleDef::ParticleDef(std::string name,
                          double charge,
                          const HardComponentTables::VecType& table,
                          const DecayTable& decay_table,
-                         const ParticleDef& partner)
+                         const int partner)
         : name(name)
         , mass(mass)
         , low(low)
@@ -144,7 +176,7 @@ ParticleDef::ParticleDef(std::string name,
         , charge(charge)
         , hard_component_table(table)
         , decay_table(decay_table)
-        , weak_partner(&partner)
+        , weak_partner(partner)
 {
 }
 ParticleDef::~ParticleDef() {}
@@ -162,12 +194,20 @@ ParticleDef::ParticleDef(const ParticleDef& def)
 }
 
 const ParticleDef* ParticleDef::GetWeakPartner() const {
-    if(weak_partner == nullptr){
+    if(weak_partner == 0){
         log_fatal("WeakPartner not defined for particle %s.", name.c_str());
         return nullptr;
     }
     else{
-        return weak_partner;
+        static bool first =true;
+        if(first){
+            makeParticleDefs();
+            first=false;
+        }
+        std::map<int,const ParticleDef&>::iterator it = ParticleDefs.find(weak_partner);
+        if(it->first==weak_partner)return &(it->second);
+        log_fatal("WeakPartner (Id: ",weak_partner, ") is not defined in PROPOSAL");
+        return nullptr;
     }
 }
 
@@ -243,7 +283,7 @@ ParticleDef::Builder::Builder()
     , charge(-1)
     , hard_component_table(&HardComponentTables::EmptyTable)
     , decay_table()
-    , weak_partner(nullptr)
+    , weak_partner(0)
 {
 }
 
@@ -260,7 +300,7 @@ EMinusDef::EMinusDef()
             -1.0,
             HardComponentTables::EmptyTable,
             DecayTable().addChannel(1.1, StableChannel()),
-            NuEDef::Get())
+            12)
 {
 }
 
@@ -275,7 +315,7 @@ EPlusDef::EPlusDef()
             1.0,
             HardComponentTables::EmptyTable,
             DecayTable().addChannel(1.1, StableChannel()),
-            NuEBarDef::Get())
+            -12)
 {
 }
 
@@ -290,7 +330,7 @@ MuMinusDef::MuMinusDef()
             -1.0,
             HardComponentTables::MuonTable,
             DecayTable().addChannel(1.0, LeptonicDecayChannelApprox(EMinusDef::Get(), NuMuDef::Get(), NuEBarDef::Get())),
-            NuMuDef::Get())
+            14)
 {
 }
 
@@ -304,7 +344,7 @@ MuPlusDef::MuPlusDef()
                   1.0,
                   HardComponentTables::MuonTable,
                   DecayTable().addChannel(1.0, LeptonicDecayChannelApprox(EPlusDef::Get(), NuEDef::Get(), NuMuBarDef::Get())),
-                  NuMuBarDef::Get())
+                  -14)
 {
 }
 
@@ -370,7 +410,7 @@ TauMinusDef::TauMinusDef()
                                       .addDaughter(PiMinusDef::Get())
                                       .addDaughter(NuTauDef::Get())
                                       .build()),
-                  NuTauDef::Get())
+                  16)
 {
 }
 
@@ -436,11 +476,101 @@ TauPlusDef::TauPlusDef()
                                       .addDaughter(PiMinusDef::Get())
                                       .addDaughter(NuTauBarDef::Get())
                                       .build()),
-                  NuTauBarDef::Get())
+                  -16)
 {
 }
 
 TauPlusDef::~TauPlusDef() {}
+
+NuEDef::NuEDef()
+        : ParticleDef(
+            "NuE",
+            0,
+            0,
+            STABLE_PARTICLE,
+            0.0,
+            HardComponentTables::EmptyTable,
+            DecayTable().addChannel(1.1, StableChannel()),
+            11)
+{
+}
+
+NuEDef::~NuEDef() {}
+
+NuEBarDef::NuEBarDef()
+        : ParticleDef(
+            "NuEBar",
+            0,
+            0,
+            STABLE_PARTICLE,
+            0.0,
+            HardComponentTables::EmptyTable,
+            DecayTable().addChannel(1.1, StableChannel()),
+            -11)
+{
+}
+
+NuEBarDef::~NuEBarDef() {}
+
+NuMuDef::NuMuDef()
+        : ParticleDef(
+            "NuMu",
+            0,
+            0,
+            STABLE_PARTICLE,
+            0.0,
+            HardComponentTables::EmptyTable,
+            DecayTable().addChannel(1.1, StableChannel()),
+            13)
+{
+}
+
+NuMuDef::~NuMuDef() {}
+
+NuMuBarDef::NuMuBarDef()
+        : ParticleDef(
+            "NuMuBar",
+            0,
+            0,
+            STABLE_PARTICLE,
+            0.0,
+            HardComponentTables::EmptyTable,
+            DecayTable().addChannel(1.1, StableChannel()),
+            -13)
+{
+}
+
+NuMuBarDef::~NuMuBarDef() {}
+
+NuTauDef::NuTauDef()
+        : ParticleDef(
+            "NuTau",
+            0,
+            0,
+            STABLE_PARTICLE,
+            0.0,
+            HardComponentTables::EmptyTable,
+            DecayTable().addChannel(1.1, StableChannel()),
+            15)
+{
+}
+
+NuTauDef::~NuTauDef() {}
+
+NuTauBarDef::NuTauBarDef()
+        : ParticleDef(
+            "NuTauBar",
+            0,
+            0,
+            STABLE_PARTICLE,
+            0.0,
+            HardComponentTables::EmptyTable,
+            DecayTable().addChannel(1.1, StableChannel()),
+            -15)
+{
+}
+
+NuTauBarDef::~NuTauBarDef() {}
 
 // ------------------------------------------------------------------------- //
 // Photon definition:
@@ -484,14 +614,14 @@ PARTICLE_IMP(KPlus, MKAON, LKAON, 1.0)
 PARTICLE_IMP(PMinus, MP, STABLE_PARTICLE, -1.0)
 PARTICLE_IMP(PPlus, MP, STABLE_PARTICLE, 1.0)
 
-PARTICLE_IMP(NuE, 0.0, STABLE_PARTICLE, 0.0)
-PARTICLE_IMP(NuEBar, 0.0, STABLE_PARTICLE, 0.0)
+//PARTICLE_IMP(NuE, 0.0, STABLE_PARTICLE, 0.0)
+//PARTICLE_IMP(NuEBar, 0.0, STABLE_PARTICLE, 0.0)
 
-PARTICLE_IMP(NuMu, 0.0, STABLE_PARTICLE, 0.0)
-PARTICLE_IMP(NuMuBar, 0.0, STABLE_PARTICLE, 0.0)
+//PARTICLE_IMP(NuMu, 0.0, STABLE_PARTICLE, 0.0)
+//PARTICLE_IMP(NuMuBar, 0.0, STABLE_PARTICLE, 0.0)
 
-PARTICLE_IMP(NuTau, 0.0, STABLE_PARTICLE, 0.0)
-PARTICLE_IMP(NuTauBar, 0.0, STABLE_PARTICLE, 0.0)
+//PARTICLE_IMP(NuTau, 0.0, STABLE_PARTICLE, 0.0)
+//PARTICLE_IMP(NuTauBar, 0.0, STABLE_PARTICLE, 0.0)
 
 PARTICLE_IMP(Monopole, MMON, STABLE_PARTICLE, CMON)
 

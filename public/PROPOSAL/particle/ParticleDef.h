@@ -101,6 +101,7 @@ struct ParticleDef
     const double charge;
     const HardComponentTables::VecType& hard_component_table;
     const DecayTable decay_table;
+    const int weak_partner;
 
     ParticleDef();
     ParticleDef(std::string name,
@@ -118,7 +119,7 @@ struct ParticleDef
                 double charge,
                 const HardComponentTables::VecType& table,
                 const DecayTable&,
-                const ParticleDef&);
+                const int partner);
 
     ParticleDef(const ParticleDef&);
     virtual ~ParticleDef();
@@ -134,7 +135,6 @@ struct ParticleDef
 
 private:
     ParticleDef& operator=(const ParticleDef&); // Undefined & not allowed
-    const ParticleDef* weak_partner; //TODO: This will cause a deadlock if two particles have each other as weak partners
 };
 
 
@@ -184,9 +184,9 @@ public:
         decay_table = var;
         return *this;
     }
-    Builder& SetWeakPartner(const ParticleDef& partner)
+    Builder& SetWeakPartner(const int partner)
     {
-        weak_partner = &partner;
+        weak_partner = partner;
         return *this;
     }
     Builder& SetParticleDef(const ParticleDef& var)
@@ -210,7 +210,7 @@ public:
             low = mass;
         }
 
-        return ParticleDef(name, mass, low, lifetime, charge, *hard_component_table, decay_table, *weak_partner);
+        return ParticleDef(name, mass, low, lifetime, charge, *hard_component_table, decay_table, weak_partner);
     }
 
 private:
@@ -221,7 +221,7 @@ private:
     double charge;
     const HardComponentTables::VecType* hard_component_table;
     DecayTable decay_table;
-    const ParticleDef* weak_partner;
+    int weak_partner;
 };
 
 // ------------------------------------------------------------------------- //
