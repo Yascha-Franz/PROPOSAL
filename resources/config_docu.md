@@ -158,7 +158,7 @@ The **muon pair production** (which is an optional process and per default disab
   - `"MupairKelnerKokoulinPetrukhin"` (Phys. Atom. Nucl. Vol. 63, No.9 (2000),  pp. 1603-1611, DOI: 10.1134/1.1312894)
   
 The **weak interaction** (charged current interaction of a charged lepton, per default disabled) parametrizations are:
-  - `"CooperSarkarMertsch"` by Cooper-Sarkar, Mertsch, Sarkar [arXiv:1106.3723 ](https://arxiv.org/abs/1106.3723v1)
+  - `"WeakCooperSarkarMertsch"` by Cooper-Sarkar, Mertsch, Sarkar [arXiv:1106.3723 ](https://arxiv.org/abs/1106.3723v1)
 
 | Keyword                  | Type   | Default    | Description |
 | -----------------------  | ------ | ---------- | ----------- |

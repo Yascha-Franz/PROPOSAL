@@ -322,6 +322,27 @@ double Sector::Propagate(double distance) {
     }
 
     while (flag) {
+        if(particle_.GetName().compare(0,2,"Nu")==0){
+            double eps=RandomGenerator::Get().RandomDouble();
+            double total_rate=0.0;
+            const std::vector<CrossSection*>& crosssections = utility_.GetCrosssections();
+            
+            for (std::vector<CrossSection*>::const_iterator iter = crosssections.begin(); iter != crosssections.end(); ++iter) {
+                total_rate += (*iter)->CalculatedNdx(particle_.GetEnergy());
+            }
+            double propdist=-std::log(eps)/total_rate;
+            if(propdist<=distance){
+                particle_interaction=true;
+                propagated_distance=propdist;
+            }
+            else{
+                propagated_distance=distance;
+            }
+            particle_.SetPropagatedDistance(particle_.GetPropagatedDistance() + propagated_distance);
+            particle_.SetTime(particle_.GetTime() + propagated_distance / SPEED);
+            particle_.SetPosition(particle_.GetPosition()+propagated_distance*particle_.GetDirection());
+        }
+        else{
         energy_till_stochastic_ = CalculateEnergyTillStochastic(initial_energy);
 
         if (energy_till_stochastic_.first > energy_till_stochastic_.second) {
@@ -415,16 +436,18 @@ double Sector::Propagate(double distance) {
             }
         }
 
+        
+        // Set the particle energy to the current energy before making
+        // stochastic losses or decay
+        particle_.SetEnergy(final_energy);
+        }
+        
         // Lower limit of particle energy is reached or
         // or complete particle is propagated the whole distance
         if (final_energy == particle_.GetLow() ||
             propagated_distance == distance) {
             break;
         }
-
-        // Set the particle energy to the current energy before making
-        // stochastic losses or decay
-        particle_.SetEnergy(final_energy);
 
         if (particle_interaction){
             std::tuple<double, DynamicData::Type, std::pair<std::vector<Particle*>, bool> > aux = MakeStochasticLoss(final_energy);

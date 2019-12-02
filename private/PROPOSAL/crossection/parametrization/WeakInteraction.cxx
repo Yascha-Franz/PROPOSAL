@@ -72,14 +72,13 @@ WeakCooperSarkarMertsch::WeakCooperSarkarMertsch(const ParticleDef& particle_def
         : WeakInteraction(particle_def, medium, multiplier)
         , interpolant_(2, NULL)
 {
-
-    if(particle_def.charge < 0.)
+    if(particle_def.charge < 0.|| particle_def.GetWeakPartner()->charge > 0.)
     {
         // Initialize interpolant for particles (remember crossing symmetry rules)
         interpolant_[0] = new Interpolant(energies, y_nubar_p, sigma_nubar_p, IROMB, false, false, IROMB, false, false);
         interpolant_[1] = new Interpolant(energies, y_nubar_n, sigma_nubar_n, IROMB, false, false, IROMB, false, false);
     }
-    else if(particle_def.charge > 0.){
+    else if(particle_def.charge > 0.|| particle_def.GetWeakPartner()->charge < 0.){
         // Initialize interpolant for antiparticles (remember crossing symmetry rules)
         interpolant_[0] = new Interpolant(energies, y_nu_p, sigma_nu_p, IROMB, false, false, IROMB, false, false);
         interpolant_[1] = new Interpolant(energies, y_nu_n, sigma_nu_n, IROMB, false, false, IROMB, false, false);

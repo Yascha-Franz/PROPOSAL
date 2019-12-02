@@ -49,10 +49,16 @@ void init_particle(py::module& m) {
     py::class_<ParticleDef, std::shared_ptr<ParticleDef>>(m_sub, "ParticleDef")
         .def(py::init<>())
         .def(py::init<std::string, double, double, double, double,
-                      const HardComponentTables::VecType&, const DecayTable&>(),
+                      const HardComponentTables::VecType&, const DecayTable&, int>(),
              py::arg("name"), py::arg("mass"), py::arg("low"),
              py::arg("lifetime"), py::arg("charge"), py::arg("hard_component"),
-             py::arg("decay_table"))
+             py::arg("decay_table"), py::arg("ParticleId"))
+        .def(py::init<std::string, double, double, double, double,
+                      const HardComponentTables::VecType&, const DecayTable&, int, int>(),
+             py::arg("name"), py::arg("mass"), py::arg("low"),
+             py::arg("lifetime"), py::arg("charge"), py::arg("hard_component"),
+             py::arg("decay_table"), py::arg("ParticleId"),
+             py::arg("partner"))
         .def(py::init<const ParticleDef&>())
 
         .def("__str__", &py_print<ParticleDef>)
@@ -77,6 +83,14 @@ void init_particle(py::module& m) {
         .def_readonly("decay_table", &ParticleDef::decay_table,
                       R"pbdoc(
                 generate a static particle with in ParticleDefBuilder properties
+            )pbdoc")
+        .def_readonly("weak_partner", &ParticleDef::weak_partner,
+                      R"pbdoc(
+                particle Id of the weak partner (= 0 if no weak partner)
+            )pbdoc")
+        .def_readonly("particle_id", &ParticleDef::particle_id,
+                      R"pbdoc(
+                particle Id
             )pbdoc")
         // .def_readonly("harc_component_table",
         // &ParticleDef::hard_component_table)
