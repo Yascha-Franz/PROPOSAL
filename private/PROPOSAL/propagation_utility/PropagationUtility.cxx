@@ -24,6 +24,7 @@ Utility::Definition::Definition()
     , ioniz_def()
     , mupair_def()
     , weak_def()
+    , weaknc_def()
     , photopair_def()
     , annihilation_def()
 {
@@ -45,6 +46,8 @@ bool Utility::Definition::operator==(
     else if (mupair_def != utility_def.mupair_def)
         return false;
     else if (weak_def != utility_def.weak_def)
+        return false;
+    else if (weaknc_def != utility_def.weaknc_def)
         return false;
     else if (photopair_def != utility_def.photopair_def)
         return false;
@@ -117,6 +120,12 @@ Utility::Utility(const ParticleDef& particle_def,
         log_debug("Weak Interaction enabled");
     }
 
+    if(utility_def.weaknc_def.parametrization!=WeakInteractionFactory_NC::Enum::None) {
+        crosssections_.push_back(WeakInteractionFactory_NC::Get().CreateWeakInteraction_NC(
+                    particle_def_, *medium_, utility_def.weaknc_def));
+        log_debug("Weak NC Interaction enabled");
+    }
+
     // Photon interactions
 
     if(utility_def.compton_def.parametrization!=ComptonFactory::Enum::None) {
@@ -182,6 +191,12 @@ Utility::Utility(const ParticleDef& particle_def,
         crosssections_.push_back(WeakInteractionFactory::Get().CreateWeakInteraction(
                     particle_def_, *medium_, utility_def.weak_def, interpolation_def));
         log_debug("Weak Interaction enabled");
+    }
+
+    if(utility_def.weaknc_def.parametrization!=WeakInteractionFactory_NC::Enum::None) {
+        crosssections_.push_back(WeakInteractionFactory_NC::Get().CreateWeakInteraction_NC(
+                    particle_def_, *medium_, utility_def.weaknc_def, interpolation_def));
+        log_debug("Weak NC Interaction enabled");
     }
 
     // Photon interactions

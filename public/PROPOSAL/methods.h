@@ -81,6 +81,7 @@ struct InterpolationDef
         , nodes_propagate(1000) // number of interpolation in propagate
         , do_binary_tables(true)
         , just_use_readonly_path(false)
+        , only_stochastic_loss(false)
     {
     }
 
@@ -93,6 +94,7 @@ struct InterpolationDef
     int nodes_propagate;
     bool do_binary_tables;
     bool just_use_readonly_path;
+    bool only_stochastic_loss;
 
     size_t GetHash() const;
 };

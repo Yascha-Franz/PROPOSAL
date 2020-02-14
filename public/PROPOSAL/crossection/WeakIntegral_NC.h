@@ -29,20 +29,20 @@
 
 #pragma once
 
-#include "PROPOSAL/crossection/CrossSectionInterpolant.h"
+#include "PROPOSAL/crossection/CrossSectionIntegral.h"
 
 namespace PROPOSAL {
 
-    class WeakInteraction;
+    class WeakInteraction_NC;
 
-    class WeakInterpolant : public CrossSectionInterpolant
+    class WeakIntegral_NC : public CrossSectionIntegral
     {
     public:
-        WeakInterpolant(const WeakInteraction&, InterpolationDef);
-        WeakInterpolant(const WeakInterpolant&);
-        virtual ~WeakInterpolant();
+        WeakIntegral_NC(const WeakInteraction_NC&);
+        WeakIntegral_NC(const WeakIntegral_NC&);
+        virtual ~WeakIntegral_NC();
 
-        CrossSection* clone() const { return new WeakInterpolant(*this); }
+        CrossSection* clone() const { return new WeakIntegral_NC(*this); }
 
         // ----------------------------------------------------------------- //
         // Public methods
@@ -53,9 +53,6 @@ namespace PROPOSAL {
         double CalculatedEdxWithoutMultiplier(double energy){ (void)energy; return 0; }
         double CalculatedE2dx(double energy){ (void)energy; return 0; }
         std::pair<std::vector<Particle*>, bool> CalculateProducedParticles(double energy, double energy_loss, const Vector3D initial_direction);
-    protected:
-        virtual bool compare(const CrossSection&) const;
-        virtual void InitdNdxInterpolation(const InterpolationDef& def);
     };
 
 } // namespace PROPOSAL

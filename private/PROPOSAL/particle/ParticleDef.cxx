@@ -380,7 +380,7 @@ TauMinusDef::TauMinusDef()
                   HardComponentTables::TauTable,
                   DecayTable()
                       .addChannel(0.1737, LeptonicDecayChannel(MuMinusDef::Get(), NuTauDef::Get(), NuMuBarDef::Get()))
-                      .addChannel(0.1783, LeptonicDecayChannelApprox(EMinusDef::Get(), NuMuDef::Get(), NuEBarDef::Get()))
+                      .addChannel(0.1783, LeptonicDecayChannelApprox(EMinusDef::Get(), NuTauDef::Get(), NuEBarDef::Get()))
                       .addChannel(0.1153, TwoBodyPhaseSpace(PiMinusDef::Get(), NuTauDef::Get()))
                       .addChannel(0.2595,
                                   ManyBodyPhaseSpace::Builder()
@@ -447,7 +447,7 @@ TauPlusDef::TauPlusDef()
                   HardComponentTables::TauTable,
                   DecayTable()
                       .addChannel(0.1737, LeptonicDecayChannel(MuPlusDef::Get(), NuTauBarDef::Get(), NuMuDef::Get()))
-                      .addChannel(0.1783, LeptonicDecayChannelApprox(EPlusDef::Get(), NuMuBarDef::Get(), NuEDef::Get()))
+                      .addChannel(0.1783, LeptonicDecayChannelApprox(EPlusDef::Get(), NuTauBarDef::Get(), NuEDef::Get()))
                       .addChannel(0.1153, TwoBodyPhaseSpace(PiPlusDef::Get(), NuTauBarDef::Get()))
                       .addChannel(0.2595,
                                   ManyBodyPhaseSpace::Builder()
@@ -509,7 +509,7 @@ NuEDef::NuEDef()
         : ParticleDef(
             "NuE",
             0,
-            0,
+            1,
             STABLE_PARTICLE,
             0.0,
             HardComponentTables::EmptyTable,
@@ -525,7 +525,7 @@ NuEBarDef::NuEBarDef()
         : ParticleDef(
             "NuEBar",
             0,
-            0,
+            1,
             STABLE_PARTICLE,
             0.0,
             HardComponentTables::EmptyTable,
@@ -541,7 +541,7 @@ NuMuDef::NuMuDef()
         : ParticleDef(
             "NuMu",
             0,
-            0,
+            1,
             STABLE_PARTICLE,
             0.0,
             HardComponentTables::EmptyTable,
@@ -557,7 +557,7 @@ NuMuBarDef::NuMuBarDef()
         : ParticleDef(
             "NuMuBar",
             0,
-            0,
+            1,
             STABLE_PARTICLE,
             0.0,
             HardComponentTables::EmptyTable,
@@ -573,7 +573,7 @@ NuTauDef::NuTauDef()
         : ParticleDef(
             "NuTau",
             0,
-            0,
+            1,
             STABLE_PARTICLE,
             0.0,
             HardComponentTables::EmptyTable,
@@ -589,7 +589,7 @@ NuTauBarDef::NuTauBarDef()
         : ParticleDef(
             "NuTauBar",
             0,
-            0,
+            1,
             STABLE_PARTICLE,
             0.0,
             HardComponentTables::EmptyTable,

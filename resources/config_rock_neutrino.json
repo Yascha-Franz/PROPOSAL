@@ -8,29 +8,32 @@
 		"interpolation":
 		{
 			"do_interpolation" : true,
-			"path_to_tables" : ["~/Desktop/Uni/PROPOSAL/Yascha/src/resources/tables"],
-			"path_to_tables_readonly" : ["~/Desktop/Uni/PROPOSAL/Yascha/src/resources/tables"],
+			"path_to_tables" : ["../../tables/"],
+			"path_to_tables_readonly" : ["../../tables/"],
 			"do_binary_tables" : false,
 			"just_use_readonly_path" : false
-        },
+		},
+		"exact_time" : false,
         
         "brems" : "None",
         "epair" : "None",
         "ioniz" : "None",
 		"photo" : "None",
 		"phot_shadow" : "None",
+		"scattering" : "NoScattering",
         
 		"weak" : "WeakCooperSarkarMertsch",
+		"weaknc" : "WeakCooperSarkarMertsch_NC",
 
 		"cuts_infront":
 		{
 			"e_cut": -1,
-			"v_cut": 0.05,
+			"v_cut": -1,
 			"cont_rand": false
 		},
 		"cuts_inside":
 		{
-			"e_cut": 500,
+			"e_cut": -1,
 			"v_cut": -1,
 			"cont_rand": false
 		},
@@ -59,19 +62,19 @@
 			{
 				"e_cut": 500,
 				"v_cut": 0.5,
-				"cont_rand": true
+				"cont_rand": false
 			},
 			"cuts_infront":
 			{
 				"e_cut": 500,
 				"v_cut": 0.5,
-				"cont_rand": true
+				"cont_rand": false
 			},
 			"cuts_behind":
 			{
 				"e_cut": 500,
 				"v_cut": 0.05,
-				"cont_rand": true
+				"cont_rand": false
 			}
 		}
 	],

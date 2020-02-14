@@ -40,6 +40,8 @@ void init_crosssection(py::module& m) {
 
             * WeakIntegral / WeakInterpolant
 
+            * WeakIntegral_NC / WeakInterpolant_NC
+
             For propagation of photons, there are the following crosssections:
 
             * ComptonIntegral / ComptonInterpolant
@@ -219,6 +221,8 @@ void init_crosssection(py::module& m) {
         .def(py::init<const MupairProduction&>(), py::arg("parametrization"));
     py::class_<WeakIntegral, std::shared_ptr<WeakIntegral>, CrossSectionIntegral>(m_sub, "WeakIntegral")
          .def(py::init<const WeakInteraction&>(), py::arg("parametrization"));
+    py::class_<WeakIntegral_NC, std::shared_ptr<WeakIntegral_NC>, CrossSectionIntegral>(m_sub, "WeakIntegral_NC")
+         .def(py::init<const WeakInteraction_NC&>(), py::arg("parametrization"));
     py::class_<ComptonIntegral, std::shared_ptr<ComptonIntegral>, CrossSectionIntegral>(m_sub, "ComptonIntegral")
          .def(py::init<const Compton&>(), py::arg("parametrization"));
     py::class_<PhotoPairIntegral, std::shared_ptr<PhotoPairIntegral>, CrossSectionIntegral>(m_sub, "PhotoPairIntegral")
@@ -245,6 +249,9 @@ void init_crosssection(py::module& m) {
     py::class_<WeakInterpolant, std::shared_ptr<WeakInterpolant>, CrossSectionInterpolant>(
         m_sub, "WeakInterpolant")
         .def(py::init<const WeakInteraction&, InterpolationDef>(), py::arg("parametrization"), py::arg("interpolation_def"));
+    py::class_<WeakInterpolant_NC, std::shared_ptr<WeakInterpolant_NC>, CrossSectionInterpolant>(
+        m_sub, "WeakInterpolant_NC")
+        .def(py::init<const WeakInteraction_NC&, InterpolationDef>(), py::arg("parametrization"), py::arg("interpolation_def"));
     py::class_<ComptonInterpolant, std::shared_ptr<ComptonInterpolant>, CrossSectionInterpolant>(
         m_sub, "ComptonInterpolant")
         .def(py::init<const Compton&, InterpolationDef>(), py::arg("parametrization"), py::arg("interpolation_def"));

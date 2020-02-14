@@ -37,6 +37,7 @@
 #include "PROPOSAL/crossection/factories/MupairProductionFactory.h"
 #include "PROPOSAL/crossection/factories/PhotonuclearFactory.h"
 #include "PROPOSAL/crossection/factories/WeakInteractionFactory.h"
+#include "PROPOSAL/crossection/factories/WeakInteractionFactory_NC.h"
 #include "PROPOSAL/crossection/factories/PhotoPairFactory.h"
 #include "PROPOSAL/crossection/factories/AnnihilationFactory.h"
 
@@ -62,6 +63,7 @@ class Utility {
         IonizationFactory::Definition ioniz_def;
         MupairProductionFactory::Definition mupair_def;
         WeakInteractionFactory::Definition weak_def;
+        WeakInteractionFactory_NC::Definition weaknc_def;
         PhotoPairFactory::Definition photopair_def;
         AnnihilationFactory::Definition annihilation_def;
 

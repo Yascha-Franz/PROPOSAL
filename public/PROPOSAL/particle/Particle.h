@@ -51,6 +51,7 @@ public:
         Hadrons,
         ContinuousEnergyLoss,
         WeakInt,
+        WeakIntNC,
         Compton,
     };
 

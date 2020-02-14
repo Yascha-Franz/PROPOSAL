@@ -29,33 +29,77 @@
 
 #pragma once
 
-#include "PROPOSAL/crossection/CrossSectionInterpolant.h"
+#include <functional>
+#include <cmath>
+#include <fstream>
+
+#include "PROPOSAL/crossection/parametrization/Parametrization.h"
+#include "PROPOSAL/medium/Medium.h"
+
+#include "PROPOSAL/math/Integral.h"
+#include "PROPOSAL/math/Interpolant.h"
+#include "PROPOSAL/math/InterpolantBuilder.h"
+
+#include "PROPOSAL/methods.h"
+
 
 namespace PROPOSAL {
 
-    class WeakInteraction;
+    class Interpolant;
 
-    class WeakInterpolant : public CrossSectionInterpolant
+    class WeakInteraction_NC : public Parametrization
     {
     public:
-        WeakInterpolant(const WeakInteraction&, InterpolationDef);
-        WeakInterpolant(const WeakInterpolant&);
-        virtual ~WeakInterpolant();
+        WeakInteraction_NC(const ParticleDef&, const Medium&, double multiplier);
+        WeakInteraction_NC(const WeakInteraction_NC&);
+        virtual ~WeakInteraction_NC();
 
-        CrossSection* clone() const { return new WeakInterpolant(*this); }
+        virtual Parametrization* clone() const = 0;
 
         // ----------------------------------------------------------------- //
         // Public methods
         // ----------------------------------------------------------------- //
 
-        //these methods return zero because the weak interaction contribution is stochastic only
-        double CalculatedEdx(double energy){ (void)energy; return 0; }
-        double CalculatedEdxWithoutMultiplier(double energy){ (void)energy; return 0; }
-        double CalculatedE2dx(double energy){ (void)energy; return 0; }
-        std::pair<std::vector<Particle*>, bool> CalculateProducedParticles(double energy, double energy_loss, const Vector3D initial_direction);
+        virtual double DifferentialCrossSection(double energy, double v) = 0;
+
+        virtual IntegralLimits GetIntegralLimits(double energy);
+
+        virtual size_t GetHash() const;
+
     protected:
-        virtual bool compare(const CrossSection&) const;
-        virtual void InitdNdxInterpolation(const InterpolationDef& def);
+        bool compare(const Parametrization&) const;
+
+    };
+
+
+class WeakCooperSarkarMertsch_NC : public WeakInteraction_NC
+{
+public:
+        typedef std::vector<Interpolant*> InterpolantVec;
+
+        WeakCooperSarkarMertsch_NC(const ParticleDef&, const Medium&, double multiplier);
+        WeakCooperSarkarMertsch_NC(const WeakCooperSarkarMertsch_NC&);
+        virtual ~WeakCooperSarkarMertsch_NC();
+
+        virtual Parametrization* clone() const { return new WeakCooperSarkarMertsch_NC(*this); }
+        static WeakInteraction_NC* create(const ParticleDef& particle_def,
+                                       const Medium& medium,
+                                       double multiplier)
+        {
+            return new WeakCooperSarkarMertsch_NC(particle_def, medium, multiplier);
+        }
+
+        virtual double DifferentialCrossSection(double energy, double v);
+
+        const std::string& GetName() const { return name_; }
+
+    protected:
+        static const std::string name_;
+
+        virtual bool compare(const Parametrization&) const;
+
+        InterpolantVec interpolant_;
+
     };
 
 } // namespace PROPOSAL

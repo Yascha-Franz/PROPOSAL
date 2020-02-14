@@ -217,6 +217,7 @@ PYBIND11_MODULE(pyPROPOSAL, m) {
         .def_readwrite("ioniz_def", &Utility::Definition::ioniz_def)
         .def_readwrite("mupair_def", &Utility::Definition::mupair_def)
         .def_readwrite("weak_def", &Utility::Definition::weak_def)
+        .def_readwrite("weaknc_def", &Utility::Definition::weaknc_def)
         .def_readwrite("compton_def", &Utility::Definition::compton_def)
         .def_readwrite("photopair_def", &Utility::Definition::photopair_def);
 

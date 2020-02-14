@@ -173,12 +173,10 @@ Sector::Sector(Particle& particle,
                sector_def.cut_settings,
                sector_def.utility_def,
                interpolation_def),
-      displacement_calculator_(
-          new UtilityInterpolantDisplacement(utility_, interpolation_def)),
+      displacement_calculator_(NULL),
       interaction_calculator_(
-          new UtilityInterpolantInteraction(utility_, interpolation_def)),
-      decay_calculator_(
-          new UtilityInterpolantDecay(utility_, interpolation_def)),
+          NULL),
+      decay_calculator_(NULL),
       exact_time_calculator_(NULL),
       cont_rand_(NULL),
       scattering_(ScatteringFactory::Get().CreateScattering(
@@ -187,6 +185,11 @@ Sector::Sector(Particle& particle,
           utility_,
           interpolation_def)) {
     // These are optional, therfore check NULL
+    if(!only_stochastic_loss()) {
+        displacement_calculator_ = new UtilityInterpolantDisplacement(utility_, interpolation_def);
+        interaction_calculator_  = new UtilityInterpolantInteraction(utility_, interpolation_def);
+        decay_calculator_        = new UtilityInterpolantDecay(utility_, interpolation_def);
+    }
     if (sector_def_.do_exact_time_calculation) {
         exact_time_calculator_ =
             new UtilityInterpolantTime(utility_, interpolation_def);
@@ -268,11 +271,21 @@ bool Sector::operator!=(const Sector& sector) const {
 
 Sector::~Sector() {
     delete geometry_;
-    delete scattering_;
+    if(scattering_){
+        delete scattering_;
+    }
 
-    delete displacement_calculator_;
-    delete interaction_calculator_;
-    delete decay_calculator_;
+    if(displacement_calculator_){
+        delete displacement_calculator_;
+    }
+
+    if(interaction_calculator_){
+        delete interaction_calculator_;
+    }
+
+    if(decay_calculator_){
+        delete decay_calculator_;
+    }
 
     // These are optional, therfore check NULL
     if (exact_time_calculator_) {
@@ -322,9 +335,9 @@ double Sector::Propagate(double distance) {
     }
 
     while (flag) {
-        if(particle_.GetName().compare(0,2,"Nu")==0){
+        if(only_stochastic_loss()){
             double eps=RandomGenerator::Get().RandomDouble();
-            double total_rate=0.0;
+            double total_rate = 0.0;
             const std::vector<CrossSection*>& crosssections = utility_.GetCrosssections();
             
             for (std::vector<CrossSection*>::const_iterator iter = crosssections.begin(); iter != crosssections.end(); ++iter) {
@@ -332,15 +345,15 @@ double Sector::Propagate(double distance) {
             }
             double propdist=-std::log(eps)/total_rate;
             if(propdist<=distance){
-                particle_interaction=true;
-                propagated_distance=propdist;
+                particle_interaction = true;
+                propagated_distance = propdist;
             }
             else{
-                propagated_distance=distance;
+                propagated_distance = distance;
             }
             particle_.SetPropagatedDistance(particle_.GetPropagatedDistance() + propagated_distance);
             particle_.SetTime(particle_.GetTime() + propagated_distance / SPEED);
-            particle_.SetPosition(particle_.GetPosition()+propagated_distance*particle_.GetDirection());
+            particle_.SetPosition(particle_.GetPosition() + propagated_distance * particle_.GetDirection());
         }
         else{
         energy_till_stochastic_ = CalculateEnergyTillStochastic(initial_energy);
@@ -720,4 +733,14 @@ std::tuple<double, DynamicData::Type, std::pair<std::vector<Particle*>, bool> > 
 
 
     return std::make_tuple(energy_loss.first, energy_loss.second, products);
+}
+
+bool Sector::only_stochastic_loss(){
+    double total_cont = 0;
+    std::vector<CrossSection*> cross_sections = utility_.GetCrosssections();
+    for (unsigned int i = 0; i < cross_sections.size(); i++) {
+        total_cont += cross_sections[i]->CalculatedEdx(particle_.GetEnergy());
+    }
+    return total_cont == 0;
+    //return particle_.GetName().compare(0,2,"Nu")==0;
 }

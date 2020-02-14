@@ -46,6 +46,16 @@ namespace PROPOSAL {
     const extern std::vector< std::vector<double> > sigma_nu_n;
     const extern std::vector< std::vector<double> > sigma_nubar_n;
 
+    const extern std::vector< std::vector<double> > y_nu_p_NC;
+    const extern std::vector< std::vector<double> > y_nubar_p_NC;
+    const extern std::vector< std::vector<double> > y_nu_n_NC;
+    const extern std::vector< std::vector<double> > y_nubar_n_NC;
+
+    const extern std::vector< std::vector<double> > sigma_nu_p_NC;
+    const extern std::vector< std::vector<double> > sigma_nubar_p_NC;
+    const extern std::vector< std::vector<double> > sigma_nu_n_NC;
+    const extern std::vector< std::vector<double> > sigma_nubar_n_NC;
+
     // BremsElectronScreening
 
     const extern std::vector<double> A_energies;

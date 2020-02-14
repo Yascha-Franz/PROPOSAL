@@ -694,7 +694,7 @@ void Propagator::ChooseCurrentSector(const Vector3D& particle_position, const Ve
     if (crossed_sector.size() == 0)
     {
         current_sector_ = NULL;
-        log_fatal("There is no sector defined at position [%f, %f, %f] !!!",
+        log_warn("There is no sector defined at position [%f, %f, %f] !!!",
                   particle_position.GetX(), particle_position.GetY(), particle_position.GetZ());
     } else
     {
@@ -1365,6 +1365,22 @@ Sector::Definition Propagator::CreateSectorDefinition(const std::string& json_ob
         log_debug("The 'weak_multiplier' option is not set. Use default (%f)", sec_def_global.utility_def.weak_def.multiplier);
     }
 
+    if (json_global.find("weak_multiplier_nc") != json_global.end())
+    {
+        if (json_global["weak_multiplier_nc"].is_number())
+        {
+            sec_def_global.utility_def.weaknc_def.multiplier = json_global["weak_multiplier_nc"].get<double>();
+        }
+        else
+        {
+            log_fatal("Invalid input for option 'weak_multiplier_nc'. Expected a number.");
+        }
+    }
+    else
+    {
+        log_debug("The 'weak_multiplier_nc' option is not set. Use default (%f)", sec_def_global.utility_def.weak_def.multiplier);
+    }
+
     if (json_global.find("compton_multiplier") != json_global.end())
     {
         if (json_global["compton_multiplier"].is_number())
@@ -1655,6 +1671,24 @@ Sector::Definition Propagator::CreateSectorDefinition(const std::string& json_ob
     {
         log_debug("The 'weak' option is not set. Use default %s",
                   WeakInteractionFactory::Get().GetStringFromEnum(sec_def_global.utility_def.weak_def.parametrization).c_str());
+    }
+
+    if (json_global.find("weaknc") != json_global.end())
+    {
+        if (json_global["weaknc"].is_string())
+        {
+            std::string weaknc = json_global["weaknc"].get<std::string>();
+            sec_def_global.utility_def.weaknc_def.parametrization = WeakInteractionFactory_NC::Get().GetEnumFromString(weaknc);
+        }
+        else
+        {
+            log_fatal("Invalid input for option 'weaknc'. Expected a string.");
+        }
+    }
+    else
+    {
+        log_debug("The 'weaknc' option is not set. Use default %s",
+                  WeakInteractionFactory_NC::Get().GetStringFromEnum(sec_def_global.utility_def.weaknc_def.parametrization).c_str());
     }
 
     if (json_global.find("compton") != json_global.end())

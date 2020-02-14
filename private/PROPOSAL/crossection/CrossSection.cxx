@@ -83,6 +83,9 @@ std::ostream& PROPOSAL::operator<<(std::ostream& os, CrossSection const& cross)
         case DynamicData::WeakInt:
             name = "WeakInteraction";
             break;
+        case DynamicData::WeakIntNC:
+            name = "WeakInteraction_NC";
+            break;
         case DynamicData::Compton:
             name = "Compton";
             break;

@@ -162,6 +162,13 @@ class Sector {
      */
     std::tuple<double, DynamicData::Type, std::pair<std::vector<Particle*>, bool> > MakeStochasticLoss(double particle_energy);
 
+    /**
+     *  Asses wether or not the particle makes continuos losses
+     *
+     *  \return bool (true if only statistic loss, false otherwise)
+     */
+    bool only_stochastic_loss();
+
     // --------------------------------------------------------------------- //
     // Enable options & Setter
     // --------------------------------------------------------------------- //

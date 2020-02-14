@@ -157,8 +157,11 @@ The **LPM effect** (Landau-Pomeranschuk-Migdal), suppressing the bremsstrahlung 
 The **muon pair production** (which is an optional process and per default disabled) parametrizations are:
   - `"MupairKelnerKokoulinPetrukhin"` (Phys. Atom. Nucl. Vol. 63, No.9 (2000),  pp. 1603-1611, DOI: 10.1134/1.1312894)
   
-The **weak interaction** (charged current interaction of a charged lepton, per default disabled) parametrizations are:
+The **weak interaction CC** (charged current interaction of a lepton, per default disabled) parametrizations are:
   - `"WeakCooperSarkarMertsch"` by Cooper-Sarkar, Mertsch, Sarkar [arXiv:1106.3723 ](https://arxiv.org/abs/1106.3723v1)
+
+The **weak interaction NC** (neutral current interaction of a lepton, per default disabled) parametrizations are:
+  - `"WeakCooperSarkarMertsch_NC"` by Cooper-Sarkar, Mertsch, Sarkar [arXiv:1106.3723 ](https://arxiv.org/abs/1106.3723v1)
 
 | Keyword                  | Type   | Default    | Description |
 | -----------------------  | ------ | ---------- | ----------- |
@@ -168,7 +171,8 @@ The **weak interaction** (charged current interaction of a charged lepton, per d
 | `photo_multiplier`       | Double | `1.0`        | Scales the nuclear interaction |
 | `annihilation_multiplier`| Double | `1.0`        | Scales the annihilation |
 | `mupair_multiplier`      | Double | `1.0`        | Scales the muon pair production |
-| `weak_multiplier`        | Double | `1.0`        | Scales the weak interaction |
+| `weak_multiplier`        | Double | `1.0`        | Scales the weak CC interaction |
+| `weak_multiplier_nc`     | Double | `1.0`        | Scales the weak NC interaction |
 | `brems`                  | String | `"BremsKelnerKokoulinPetrukhin"` | Bremsstrahlung parametrization |
 | `epair`                  | String | `"EpairKelnerKokoulinPetrukhin"` | Electron pair production parametrization |
 | `ioniz`                  | String | `"IonizBetheBlochRossi"` | Ionization parametrization |
@@ -179,7 +183,8 @@ The **weak interaction** (charged current interaction of a charged lepton, per d
 | `annihilation`           | String | `"None"` | Annihilation parametrization |
 | `mupair`                 | String | `"None"` | Muon pair production parametrization |
 | `mupair_particle_output` | Bool   | `True`     | Produced muon pairs are treated as particles with corresponding energies in the Output of Secondaries (and not as DynamicData objects) |
-| `weak`                   | String | `"None"` | Weak interaction parametrization |
+| `weak`                   | String | `"None"` | Weak CC interaction parametrization |
+| `weaknc`                 | String | `"None"` | Weak NC interaction parametrization |
 
 There are also parametrizations that can be used for **Photon propagation**.
 [Here](config_photon.md) they are described in detail. 

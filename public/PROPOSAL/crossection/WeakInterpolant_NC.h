@@ -33,16 +33,16 @@
 
 namespace PROPOSAL {
 
-    class WeakInteraction;
+    class WeakInteraction_NC;
 
-    class WeakInterpolant : public CrossSectionInterpolant
+    class WeakInterpolant_NC : public CrossSectionInterpolant
     {
     public:
-        WeakInterpolant(const WeakInteraction&, InterpolationDef);
-        WeakInterpolant(const WeakInterpolant&);
-        virtual ~WeakInterpolant();
+        WeakInterpolant_NC(const WeakInteraction_NC&, InterpolationDef);
+        WeakInterpolant_NC(const WeakInterpolant_NC&);
+        virtual ~WeakInterpolant_NC();
 
-        CrossSection* clone() const { return new WeakInterpolant(*this); }
+        CrossSection* clone() const { return new WeakInterpolant_NC(*this); }
 
         // ----------------------------------------------------------------- //
         // Public methods
