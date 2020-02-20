@@ -15,7 +15,7 @@
 using namespace PROPOSAL;
 
 WeakInterpolant_NC::WeakInterpolant_NC(const WeakInteraction_NC& param, InterpolationDef def)
-        : CrossSectionInterpolant(DynamicData::WeakIntNC, param) {
+        : CrossSectionInterpolant(InteractionType::WeakIntNC, param) {
     // Use own dNdx interpolation
     WeakInterpolant_NC::InitdNdxInterpolation(def);
 }
@@ -127,8 +127,11 @@ void WeakInterpolant_NC::InitdNdxInterpolation(const InterpolationDef& def)
     Helper::InitializeInterpolation("dNdx", builder_return, std::vector<Parametrization*>(1, parametrization_), def);
 }
 
-std::pair<std::vector<Particle*>, bool> WeakInterpolant_NC::CalculateProducedParticles(double energy, double energy_loss, const Vector3D initial_direction){
+std::pair<std::vector<DynamicData>, bool> WeakInterpolant_NC::CalculateProducedParticles(double energy, double energy_loss, const Vector3D& initial_direction) {
+    (void)energy;
+    (void)energy_loss;
+    (void)initial_direction;
     // interaction energises a nukleus, which is not monitored in PROPOSAL
 
-    return std::make_pair(std::vector<Particle*>{}, false);
+    return std::make_pair(std::vector<DynamicData>{}, false);
 }

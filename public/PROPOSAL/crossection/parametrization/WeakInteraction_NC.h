@@ -68,6 +68,7 @@ namespace PROPOSAL {
 
     protected:
         bool compare(const Parametrization&) const;
+        double GetWeakPartnerCharge(const ParticleDef& particle_def);
 
     };
 

@@ -44,7 +44,7 @@ public:
     // No copy and assignemnt -> done by clone
     DecayChannel* clone() const { return new LeptonicDecayChannelApprox(*this); }
 
-    virtual DecayProducts Decay(const Particle&);
+    Secondaries Decay(const ParticleDef&, const DynamicData&);
 
     const std::string& GetName() const { return name_; }
 
@@ -68,8 +68,6 @@ protected:
     /// @brief Function for electron energy calculation - interface to FindRoot
     // ----------------------------------------------------------------------------
     virtual double DifferentialDecayRate(double x, double parent_mass, double E_max);
-
-    std::pair<double, double> function_and_derivative(double x, double parent_mass, double E_max, double right_side);
 
     double FindRoot(double min, double parent_mass, double E_max, double right_side);
 };

@@ -41,24 +41,25 @@ class ScatteringMoliere : public Scattering
 {
 public:
     // constructor
-    ScatteringMoliere(Particle&, const Medium&);
-    ScatteringMoliere(Particle&, const ScatteringMoliere&);
+    ScatteringMoliere(const ParticleDef&, const Medium&);
+    ScatteringMoliere(const ParticleDef&, const ScatteringMoliere&);
     ScatteringMoliere(const ScatteringMoliere&);
     ~ScatteringMoliere();
 
-    Scattering* clone() const { return new ScatteringMoliere(*this); }
-    virtual Scattering* clone(Particle& particle, const Utility& utility) const
+    Scattering* clone() const override { return new ScatteringMoliere(*this); }
+    virtual Scattering* clone(const ParticleDef& particle_def, const Utility& utility) const override
     {
         (void)utility;
-        return new ScatteringMoliere(particle, *this);
+        return new ScatteringMoliere(particle_def, *this);
     }
 
 private:
     ScatteringMoliere& operator=(const ScatteringMoliere&); // Undefined & not allowed
 
-    bool compare(const Scattering&) const;
+    bool compare(const Scattering&) const override;
+    void print(std::ostream&) const override;
 
-    RandomAngles CalculateRandomAngle(double dr, double ei, double ef);
+    RandomAngles CalculateRandomAngle(double dr, double ei, double ef, const Vector3D& pos, double rnd1, double rnd2, double rnd3, double rnd4) override;
 
     const Medium* medium_;
 
@@ -89,6 +90,6 @@ private:
     //----------------------------------------------------------------------------//
     //----------------------------------------------------------------------------//
 
-    double GetRandom(double pre_factor);
+    double GetRandom(double pre_factor, double rnd);
 };
 } // namespace PROPOSAL

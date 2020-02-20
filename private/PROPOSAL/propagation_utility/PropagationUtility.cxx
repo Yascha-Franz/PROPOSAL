@@ -76,6 +76,7 @@ Utility::Utility(const ParticleDef& particle_def,
     , medium_(medium.clone())
     , cut_settings_(cut_settings)
     , crosssections_()
+    , only_stochastic(true)
 {
     if(utility_def.brems_def.parametrization!=BremsstrahlungFactory::Enum::None) {
         crosssections_.push_back(BremsstrahlungFactory::Get().CreateBremsstrahlung(
@@ -139,6 +140,12 @@ Utility::Utility(const ParticleDef& particle_def,
                 particle_def_, *medium_, utility_def.photopair_def));
         log_debug("PhotoPairProduction enabled");
     }
+
+    for (unsigned int i = 0; i < crosssections_.size(); i++) {
+        if(crosssections_[i]->CalculatedEdx(10)!=0){
+            only_stochastic = false;
+        }
+    }
 }
 
 Utility::Utility(const ParticleDef& particle_def,
@@ -150,6 +157,7 @@ Utility::Utility(const ParticleDef& particle_def,
     , medium_(medium.clone())
     , cut_settings_(cut_settings)
     , crosssections_()
+    , only_stochastic(true)
 {
     if(utility_def.brems_def.parametrization!=BremsstrahlungFactory::Enum::None) {
         crosssections_.push_back(BremsstrahlungFactory::Get().CreateBremsstrahlung(
@@ -212,12 +220,19 @@ Utility::Utility(const ParticleDef& particle_def,
                 particle_def_, *medium_, utility_def.photopair_def, interpolation_def));
         log_debug("PhotoPairProduction enabled");
     }
+
+    for (unsigned int i = 0; i < crosssections_.size(); i++) {
+        if(crosssections_[i]->CalculatedEdx(10)!=0){
+            only_stochastic = false;
+        }
+    }
 }
 
 Utility::Utility(const std::vector<CrossSection*>& crosssections) try
     : particle_def_(crosssections.at(0)->GetParametrization().GetParticleDef()),
       medium_(crosssections.at(0)->GetParametrization().GetMedium().clone()),
-      cut_settings_(crosssections.at(0)->GetParametrization().GetEnergyCuts()) {
+      cut_settings_(crosssections.at(0)->GetParametrization().GetEnergyCuts()),
+      only_stochastic(true) {
     for (std::vector<CrossSection*>::const_iterator it = crosssections.begin();
          it != crosssections.end(); ++it) {
         if ((*it)->GetParametrization().GetParticleDef() != particle_def_) {
@@ -234,16 +249,23 @@ Utility::Utility(const std::vector<CrossSection*>& crosssections) try
         }
 
         crosssections_.push_back((*it)->clone());
+
+        for (unsigned int i = 0; i < crosssections_.size(); i++) {
+            if(crosssections_[i]->CalculatedEdx(10)!=0){
+                only_stochastic = false;
+            }
+        }
     }
-} catch (const std::out_of_range& e) {
-    log_fatal("At least one cross section is needed for initializing utility.");
-}
+    } catch (const std::out_of_range& e) {
+        log_fatal("At least one cross section is needed for initializing utility.");
+    }
 
 Utility::Utility(const Utility& collection)
     : particle_def_(collection.particle_def_),
       medium_(collection.medium_->clone()),
       cut_settings_(collection.cut_settings_),
-      crosssections_(collection.crosssections_.size(), NULL) {
+      crosssections_(collection.crosssections_.size(), NULL),
+      only_stochastic(collection.only_stochastic) {
     for (unsigned int i = 0; i < crosssections_.size(); ++i) {
         crosssections_[i] = collection.crosssections_[i]->clone();
     }
@@ -282,6 +304,58 @@ bool Utility::operator==(const Utility& utility) const {
 bool Utility::operator!=(const Utility& utility) const {
     return !(*this == utility);
 }
+
+
+CrossSection* Utility::GetCrosssection(int typeId) const {
+    for (auto& i : crosssections_) {
+        if (i->GetTypeId() == typeId) {
+            return i;
+        }
+    }
+    log_fatal("No CrossSection found");
+    return nullptr;
+}
+
+
+std::pair<double, int> Utility::StochasticLoss(
+    double particle_energy, double rnd1, double rnd2, double rnd3)
+{
+    double total_rate = 0;
+    double total_rate_weighted = 0;
+    double rates_sum = 0;
+    std::vector<double> rates;
+    rates.resize(crosssections_.size());
+
+    // return 0 and unknown, if there is no interaction
+    std::pair<double, int> energy_loss;
+    energy_loss.first = 0.;
+    energy_loss.second = 0;
+
+    for (unsigned int i = 0; i < crosssections_.size(); i++) {
+        rates[i] = crosssections_[i]->CalculatedNdx(particle_energy, rnd2);
+        total_rate += rates[i];
+    }
+
+    total_rate_weighted = total_rate * rnd1;
+
+    log_debug("Total rate = %f, total rate weighted = %f", total_rate,
+              total_rate_weighted);
+
+    for (unsigned int i = 0; i < rates.size(); i++) {
+        rates_sum += rates[i];
+
+        if (rates_sum >= total_rate_weighted) {
+            energy_loss.first = crosssections_[i]->CalculateStochasticLoss(
+                particle_energy, rnd2, rnd3);
+            energy_loss.second = crosssections_[i]->GetTypeId();
+
+            break;
+        }
+    }
+
+    return energy_loss;
+}
+
 
 /******************************************************************************
  *                            Utility Decorator                            *

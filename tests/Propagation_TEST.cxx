@@ -121,13 +121,15 @@ TEST(Propagation, Test_nan)
     int EmaxLog10 = 8;
 
     // Define Particles
-    Particle mu(MuMinusDef::Get());
-    Particle tau(TauMinusDef::Get());
+    ParticleDef mu_def = MuMinusDef::Get();
+    ParticleDef tau_def = TauMinusDef::Get();
+    DynamicData mu(mu_def.particle_type);
+    DynamicData tau(tau_def.particle_type);
 
     // one propagator for each particle definition
     // medium/detector configuration
-    Propagator prop_mu(mu.GetParticleDef(), "resources/config_ice.json");
-    Propagator prop_tau(tau.GetParticleDef(), "resources/config_ice.json");
+    Propagator prop_mu(mu_def, "resources/config_ice.json");
+    Propagator prop_tau(tau_def, "resources/config_ice.json");
 
     // Possibility to register propagator in a service
     PropagatorService prop_service;
@@ -140,6 +142,7 @@ TEST(Propagation, Test_nan)
         // Using propagator service
         // ----------------------------------------------------------------- //
 
+        std::cout << i << std::endl;
         // Set particle properties
         mu.SetEnergy(std::pow(10, EmaxLog10));
         mu.SetPropagatedDistance(0);
@@ -152,22 +155,24 @@ TEST(Propagation, Test_nan)
         tau.SetDirection(Vector3D(0, 0, -1));
 
         // Use service to propagate different particle
-        std::vector<DynamicData*> sec_mu  = prop_service.Propagate(mu);
-        std::vector<DynamicData*> sec_tau = prop_service.Propagate(tau);
+        std::cout << "Muon" << std::endl;
+        Secondaries sec_mu  = prop_service.Propagate(mu_def, mu);
+        std::cout << "Tau" << std::endl;
+        Secondaries sec_tau = prop_service.Propagate(tau_def, tau);
 
         // ----------------------------------------------------------------- //
         // Using propagator directly
         // ----------------------------------------------------------------- //
 
         // Therefor its needed to get the internal created particle first
-        Particle& particle = prop_mu.GetParticle();
+        // Particle& particle = prop_mu.GetParticle();
 
-        particle.SetEnergy(std::pow(10, EmaxLog10));
-        particle.SetPropagatedDistance(0);
-        particle.SetPosition(Vector3D(0, 0, 0));
-        particle.SetDirection(Vector3D(0, 0, -1));
+        mu.SetEnergy(std::pow(10, EmaxLog10));
+        mu.SetPropagatedDistance(0);
+        mu.SetPosition(Vector3D(0, 0, 0));
+        mu.SetDirection(Vector3D(0, 0, -1));
 
-        std::vector<DynamicData*> sec_mu_direct = prop_mu.Propagate();
+        Secondaries sec_mu_direct = prop_mu.Propagate(mu);
     }
 }
 
@@ -191,8 +196,9 @@ TEST(Propagation, particle_type)
 
     in >> statistic >> energy;
 
-    Propagator prop_mu(MuMinusDef::Get(), "resources/config_ice.json");
-    Particle& mu = prop_mu.GetParticle();
+    ParticleDef mu_def = MuMinusDef::Get();
+    Propagator prop_mu(mu_def, "resources/config_ice.json");
+    DynamicData mu(mu_def.particle_type);
 
     mu.SetEnergy(energy);
     mu.SetPropagatedDistance(0);
@@ -226,45 +232,46 @@ TEST(Propagation, particle_type)
         mu.SetPosition(Vector3D(0, 0, 0));
         mu.SetDirection(Vector3D(0, 0, -1));
 
-        std::vector<DynamicData*> sec_mu_direct = prop_mu.Propagate();
+        std::vector<DynamicData> sec_mu_direct = prop_mu.Propagate(mu).GetSecondaries();
 
         std::string name_new = "";
 
         for (unsigned int j = 0; j < sec_mu_direct.size(); ++j)
         {
-            if (sec_mu_direct[j]->GetTypeId() == DynamicData::Particle)
-            {
-                Particle* particle = dynamic_cast<Particle*>(sec_mu_direct[j]);
-                name_new           = particle->GetName();
-            } else
-            {
-                switch (sec_mu_direct[j]->GetTypeId())
-                {
-                    case DynamicData::Brems:
-                        name_new = "Brems";
-                        break;
-                    case DynamicData::Epair:
-                        name_new = "Epair";
-                        break;
-                    case DynamicData::NuclInt:
-                        name_new = "NuclInt";
-                        break;
-                    case DynamicData::DeltaE:
-                        name_new = "DeltaE";
-                        break;
-                    default:
-                        break;
-                }
-            }
+            // if (sec_mu_direct[j].GetTypeId() == DynamicData::Particle)
+            // {
+            //     Particle* particle = dynamic_cast<Particle*>(sec_mu_direct[j]);
+            //     name_new           = particle->GetName();
+            // } else
+            // {
+            //     switch (sec_mu_direct[j].GetTypeId())
+            //     {
+            //         case DynamicData::Brems:
+            //             name_new = "Brems";
+            //             break;
+            //         case DynamicData::Epair:
+            //             name_new = "Epair";
+            //             break;
+            //         case DynamicData::NuclInt:
+            //             name_new = "NuclInt";
+            //             break;
+            //         case DynamicData::DeltaE:
+            //             name_new = "DeltaE";
+            //             break;
+            //         default:
+            //             break;
+            //     }
+            // }
+            name_new = sec_mu_direct[j].GetName();
 
             in >> name >> length >> sec_energy >> x >> y >> z >> dx >> dy >> dz;
 
-            double energy_new  = sec_mu_direct[j]->GetEnergy();
-            double lenght_new  = sec_mu_direct[j]->GetPropagatedDistance();
-            Vector3D position  = sec_mu_direct[j]->GetPosition();
-            Vector3D direction = sec_mu_direct[j]->GetDirection();
+            double energy_new  = sec_mu_direct[j].GetEnergy();
+            double lenght_new  = sec_mu_direct[j].GetPropagatedDistance();
+            Vector3D position  = sec_mu_direct[j].GetPosition();
+            Vector3D direction = sec_mu_direct[j].GetDirection();
 
-            EXPECT_TRUE(name == name_new);
+            EXPECT_TRUE(name.compare(name_new)==0);
             ASSERT_NEAR(length, lenght_new, error * length);
             ASSERT_NEAR(sec_energy, energy_new, error * sec_energy);
             ASSERT_NEAR(x, position.GetX(), error * std::abs(x));

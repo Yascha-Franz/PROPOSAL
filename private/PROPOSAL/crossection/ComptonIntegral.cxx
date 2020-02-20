@@ -12,7 +12,7 @@
 using namespace PROPOSAL;
 
 ComptonIntegral::ComptonIntegral(const Compton& param)
-        : CrossSectionIntegral(DynamicData::Compton, param)
+        : CrossSectionIntegral(InteractionType::Compton, param)
 {
 }
 
@@ -186,13 +186,12 @@ double ComptonIntegral::CalculateCumulativeCrossSection(double energy, int i, do
             2);
 }
 
-void ComptonIntegral::StochasticDeflection(Particle *particle, double energy, double energy_loss) {
+std::pair<double, double> ComptonIntegral::StochasticDeflection(double energy, double energy_loss) {
     double theta_deflect = RandomGenerator::Get().RandomDouble() * 2 * PI; // random azimuth
     double cosphi = 1. - (ME * (1. / (energy - energy_loss) - 1. / energy));
 
-    particle->DeflectDirection(cosphi, theta_deflect);
+    return std::make_pair(cosphi, theta_deflect);
 }
-
 // ------------------------------------------------------------------------- //
 // Private methods
 // ------------------------------------------------------------------------- //

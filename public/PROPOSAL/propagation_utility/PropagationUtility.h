@@ -45,6 +45,7 @@
 #include "PROPOSAL/math/Vector3D.h"
 #include "PROPOSAL/medium/Medium.h"
 #include "PROPOSAL/particle/ParticleDef.h"
+#include "PROPOSAL/particle/Particle.h"
 
 namespace PROPOSAL {
 
@@ -69,6 +70,7 @@ class Utility {
 
         bool operator==(const Utility::Definition& utility_def) const;
         bool operator!=(const Utility::Definition& utility_def) const;
+        bool only_stochastic;
 
         Definition();
         ~Definition();
@@ -92,12 +94,17 @@ class Utility {
 
     bool operator==(const Utility& utility) const;
     bool operator!=(const Utility& utility) const;
+    bool only_stochastic;
 
     const ParticleDef& GetParticleDef() const { return particle_def_; }
     const Medium& GetMedium() const { return *medium_; }
     const std::vector<CrossSection*>& GetCrosssections() const {
         return crosssections_;
     }
+    CrossSection* GetCrosssection(int typeId) const;
+
+    std::pair<double, int> StochasticLoss(
+        double particle_energy, double rnd1, double rnd2, double rnd3);
 
    protected:
     Utility& operator=(const Utility&);  // Undefined & not allowed

@@ -15,7 +15,7 @@
 using namespace PROPOSAL;
 
 WeakInterpolant::WeakInterpolant(const WeakInteraction& param, InterpolationDef def)
-        : CrossSectionInterpolant(DynamicData::WeakInt, param) {
+        : CrossSectionInterpolant(InteractionType::WeakInt, param) {
     // Use parent CrossSecition dNdx interpolation
    WeakInterpolant::InitdNdxInterpolation(def);
 }
@@ -127,12 +127,14 @@ bool WeakInterpolant::compare(const CrossSection& cross_section) const
     return true;
 }
 
-std::pair<std::vector<Particle*>, bool> WeakInterpolant::CalculateProducedParticles(double energy, double energy_loss, const Vector3D initial_direction){
+std::pair<std::vector<DynamicData>, bool> WeakInterpolant::CalculateProducedParticles(double energy, double energy_loss, const Vector3D& initial_direction){
     // interaction is fatal and the initial particle is converted to a neutrino
-    Particle* return_particle;
-    return_particle = new Particle(*parametrization_->GetParticleDef().GetWeakPartner());
-    return_particle->SetEnergy(energy - energy_loss);
-    return_particle->SetDirection(initial_direction);
+    DynamicData return_particle(parametrization_->GetParticleDef().weak_partner);
+    // int p_id(static_cast<int>(parametrization_->GetParticleDef().weak_partner));
+    // auto p_def = Id_Particle_Map.find(p_id);
+    // return_particle = new Particle(p_def->second);
+    return_particle.SetEnergy(energy - energy_loss);
+    return_particle.SetDirection(initial_direction);
 
-    return std::make_pair(std::vector<Particle*>{return_particle}, true);
+    return std::make_pair(std::vector<DynamicData>{return_particle}, true);
 }

@@ -43,24 +43,25 @@ class Medium;
 class ScatteringNoScattering : public Scattering
 {
 public:
-    ScatteringNoScattering(Particle&, const Medium&);
-    ScatteringNoScattering(Particle&, const ScatteringNoScattering&);
+    ScatteringNoScattering(const ParticleDef&, const Medium&);
+    ScatteringNoScattering(const ParticleDef&, const ScatteringNoScattering&);
     ScatteringNoScattering(const ScatteringNoScattering&);
     ~ScatteringNoScattering();
 
-    virtual Scattering* clone() const { return new ScatteringNoScattering(*this); }
-    virtual Scattering* clone(Particle& particle, const Utility& utility) const
+    virtual Scattering* clone() const override { return new ScatteringNoScattering(*this); }
+    virtual Scattering* clone(const ParticleDef& particle_def, const Utility& utility) const override
     {
         (void)utility;
-        return new ScatteringNoScattering(particle, *this);
+        return new ScatteringNoScattering(particle_def, *this);
     }
 
 private:
     ScatteringNoScattering& operator=(const ScatteringNoScattering&); // Undefined & not allowed
 
-    bool compare(const Scattering&) const;
+    bool compare(const Scattering&) const override;
+    void print(std::ostream&) const override;
 
-    RandomAngles CalculateRandomAngle(double dr, double ei, double ef);
+    RandomAngles CalculateRandomAngle(double dr, double ei, double ef, const Vector3D& pos, double rnd1, double rnd2, double rnd3, double rnd4) override;
 
     const Medium* medium_;
 };

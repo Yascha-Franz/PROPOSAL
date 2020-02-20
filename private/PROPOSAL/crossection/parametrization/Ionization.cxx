@@ -21,7 +21,7 @@ Ionization::Ionization(const ParticleDef& particle_def,
                        const Medium& medium,
                        const EnergyCutSettings& cuts,
                        double multiplier)
-    : Parametrization(particle_def, medium, cuts, multiplier)
+    : Parametrization(particle_def, medium, cuts, multiplier, true)
 {
 }
 

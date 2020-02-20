@@ -43,7 +43,7 @@ MupairProduction::MupairProduction(const ParticleDef& particle_def,
                                  const EnergyCutSettings& cuts,
                                  double multiplier,
                                  bool particle_output)
-    : Parametrization(particle_def, medium, cuts, multiplier), drho_integral_(IROMB, IMAXS, IPREC), particle_output_(particle_output)
+    : Parametrization(particle_def, medium, cuts, multiplier, true), drho_integral_(IROMB, IMAXS, IPREC), particle_output_(particle_output)
 {
 }
 

@@ -8,7 +8,7 @@ TauDef = pp.particle.TauMinusDef.get()
 Direction = pp.Vector3D(0,0,-1)
 Position = pp.Vector3D(0,0,6.374134e12)
 statistic = 10**(4)
-Energy_bins = 10**(np.linspace(10, 10 ,1))
+Energy_bins = 10**(np.linspace(10, 11 ,2))
 
 #nutauprop = pp.Propagator(NuTauDef, "../../config_rock_neutrino.json")
 tauprop = pp.Propagator(TauDef, "../../config_rock_lepton.json")
@@ -44,3 +44,5 @@ for i in range(0,np.size(Energy_bins)):
             print(direction)
             print(count_wrong, "/", j)
             print()
+
+print("Hallo")

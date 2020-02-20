@@ -6,6 +6,7 @@
 #include "PROPOSAL/decay/StableChannel.h"
 #include "PROPOSAL/decay/TwoBodyPhaseSpace.h"
 #include "PROPOSAL/particle/Particle.h"
+#include "PROPOSAL/math/RandomGenerator.h"
 
 using namespace PROPOSAL;
 
@@ -126,8 +127,8 @@ TEST(SelectChannel, Muon)
 {
 
     // Leptinic decay channel in muon case
-    Particle muon;
-    DecayChannel& dc_muon = muon.GetDecayTable().SelectChannel();
+    ParticleDef mu_def = MuMinusDef::Get();
+    DecayChannel& dc_muon = mu_def.decay_table.SelectChannel(0.5);
 
     LeptonicDecayChannel leptonic_channel(EMinusDef::Get(), NuMuDef::Get(), NuEBarDef::Get());
 
@@ -137,8 +138,8 @@ TEST(SelectChannel, Muon)
 TEST(SelectChannel, Electron)
 {
     // Leptinic decay channel in electron case
-    Particle electron(EMinusDef::Get());
-    DecayChannel& dc_electron = electron.GetDecayTable().SelectChannel();
+    ParticleDef electron_def = EMinusDef::Get();
+    DecayChannel& dc_electron = electron_def.decay_table.SelectChannel(0.5);
 
     StableChannel stable_channel;
 
@@ -148,14 +149,16 @@ TEST(SelectChannel, Electron)
 TEST(SelectChannel, Tau)
 {
     // tauon decay channels
-    Particle tau(TauMinusDef::Get());
+    ParticleDef tau_def = TauMinusDef::Get();
 
     int leptonic_count = 0;
     int twobody_count  = 0;
+    double random_ch;
 
     for (int i = 0; i < 1000; ++i)
     {
-        DecayChannel& dc_tau = tau.GetDecayTable().SelectChannel();
+        random_ch = RandomGenerator::Get().RandomDouble();
+        DecayChannel& dc_tau = tau_def.decay_table.SelectChannel(random_ch);
 
         if (dynamic_cast<LeptonicDecayChannel*>(&dc_tau))
         {

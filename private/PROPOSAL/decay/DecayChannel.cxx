@@ -12,6 +12,8 @@
 #include "PROPOSAL/Logging.h"
 #include "PROPOSAL/methods.h"
 
+#include "PROPOSAL/Secondaries.h"
+
 using namespace PROPOSAL;
 
 DecayChannel::DecayChannel() {}
@@ -46,7 +48,7 @@ std::ostream& PROPOSAL::operator<<(std::ostream& os, DecayChannel const& channel
 }
 
 // ------------------------------------------------------------------------- //
-void DecayChannel::Boost(Particle& particle, const Vector3D& direction_unnormalized, double gamma, double betagamma)
+void DecayChannel::Boost(DynamicData& particle, const Vector3D& direction_unnormalized, double gamma, double betagamma)
 {
     Vector3D direction = direction_unnormalized;
     direction.normalise();
@@ -67,11 +69,11 @@ void DecayChannel::Boost(Particle& particle, const Vector3D& direction_unnormali
 }
 
 // ------------------------------------------------------------------------- //
-void DecayChannel::Boost(DecayProducts& products, const Vector3D& direction, double gamma, double betagamma)
+void DecayChannel::Boost(Secondaries& secondaries, const Vector3D& direction, double gamma, double betagamma)
 {
-    for (DecayProducts::const_iterator iter = products.begin(); iter != products.end(); ++iter)
+    for (auto& p : secondaries.GetModifyableSecondaries())
     {
-        Boost(**iter, direction, gamma, betagamma);
+        Boost(p, direction, gamma, betagamma);
     }
 }
 
@@ -85,7 +87,18 @@ double DecayChannel::Momentum(double m1, double m2, double m3)
         return std::sqrt(kaellen) / (2.0 * m1);
     } else
     {
-        log_fatal("Kaellen function is negative. Cannot caluclate momentum");
+        // here this term is numerically unstable,
+        // to handle also the cases at the edge of the phase space
+        // use COMPUTER_PRECISION or std::numeric_limits<double>::epsilon()
+        if (std::abs(m1 - m2 - m3) < m1*COMPUTER_PRECISION)
+        {
+            log_warn("(m1-m2-m3) in Kaellen function is numerically unstable and slightly negative %f. Now set to zero.",
+                (m1 - m2 - m3));
+        }
+        else
+        {
+            log_fatal("Kaellen function is negative. Cannot caluclate momentum");
+        }
         return 0.0;
     }
 }
@@ -105,19 +118,3 @@ Vector3D DecayChannel::GenerateRandomDirection()
 // ------------------------------------------------------------------------- //
 // Protected Member functions
 // ------------------------------------------------------------------------- //
-
-// ------------------------------------------------------------------------- //
-void DecayChannel::CopyParticleProperties(DecayProducts& products, const Particle& particle)
-{
-    int id = 1;
-    for (std::vector<Particle*>::iterator iter = products.begin(); iter != products.end(); ++iter)
-    {
-        (*iter)->SetPosition(particle.GetPosition());
-        (*iter)->SetTime(particle.GetTime());
-        (*iter)->SetParentParticleEnergy(particle.GetEnergy());
-        (*iter)->SetParticleId(particle.GetParticleId() + id);
-        (*iter)->SetParentParticleId(particle.GetParticleId());
-
-        id++;
-    }
-}

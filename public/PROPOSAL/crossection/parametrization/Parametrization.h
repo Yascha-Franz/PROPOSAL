@@ -44,7 +44,7 @@ class Medium;
 class Parametrization
 {
 public:
-    Parametrization(const ParticleDef&, const Medium&, const EnergyCutSettings&, double multiplier);
+    Parametrization(const ParticleDef&, const Medium&, const EnergyCutSettings&, double multiplier, bool fatal);
     Parametrization(const Parametrization&);
     virtual ~Parametrization();
 
@@ -89,6 +89,7 @@ public:
     const EnergyCutSettings& GetEnergyCuts() const { return cut_settings_; }
     double GetMultiplier() const { return multiplier_; }
     virtual bool IsParticleOutputEnabled() const {return false;} // no particle production per default
+    bool isFatal(){return fatal_;}
 
     virtual size_t GetHash() const;
 
@@ -116,6 +117,7 @@ protected:
     int component_index_;
 
     double multiplier_;
+    bool fatal_;
 };
 
 std::ostream& operator<<(std::ostream&, PROPOSAL::Parametrization const&);

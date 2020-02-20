@@ -43,7 +43,7 @@ EpairProduction::EpairProduction(const ParticleDef& particle_def,
                                  const EnergyCutSettings& cuts,
                                  double multiplier,
                                  bool lpm)
-    : Parametrization(particle_def, medium, cuts, multiplier)
+    : Parametrization(particle_def, medium, cuts, multiplier, true)
     , init_lpm_effect_(true)
     , lpm_(lpm)
     , eLpm_(0)

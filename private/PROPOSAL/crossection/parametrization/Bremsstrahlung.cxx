@@ -45,7 +45,7 @@ Bremsstrahlung::Bremsstrahlung(const ParticleDef& particle_def,
                                const EnergyCutSettings& cuts,
                                double multiplier,
                                bool lpm)
-    : Parametrization(particle_def, medium, cuts, multiplier)
+    : Parametrization(particle_def, medium, cuts, multiplier, true)
     , lorenz_(false) // TODO(mario): make it use to enable Mon 2017/09/04
     , lorenz_cut_(1e6)
     , init_lpm_effect_(true)

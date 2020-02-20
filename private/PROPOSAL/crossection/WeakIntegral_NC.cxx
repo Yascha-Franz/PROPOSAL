@@ -10,7 +10,7 @@
 using namespace PROPOSAL;
 
 WeakIntegral_NC::WeakIntegral_NC(const WeakInteraction_NC& param)
-        : CrossSectionIntegral(DynamicData::WeakIntNC, param)
+        : CrossSectionIntegral(InteractionType::WeakIntNC, param)
 {
 }
 
@@ -21,8 +21,11 @@ WeakIntegral_NC::WeakIntegral_NC(const WeakIntegral_NC& weak)
 
 WeakIntegral_NC::~WeakIntegral_NC() {}
 
-std::pair<std::vector<Particle*>, bool> WeakIntegral_NC::CalculateProducedParticles(double energy, double energy_loss, const Vector3D initial_direction){
+std::pair<std::vector<DynamicData>, bool> WeakIntegral_NC::CalculateProducedParticles(double energy, double energy_loss, const Vector3D& initial_direction) {
     // interaction energises a nukleus, which is not monitored in PROPOSAL
+    (void)energy;
+    (void)energy_loss;
+    (void)initial_direction;
 
-    return std::make_pair(std::vector<Particle*>{}, false);
+    return std::make_pair(std::vector<DynamicData>{}, false);
 }

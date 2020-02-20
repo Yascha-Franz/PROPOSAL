@@ -29,6 +29,7 @@
 
 #pragma once
 
+#include "PROPOSAL/Secondaries.h"
 #include <string>
 #include <vector>
 
@@ -42,8 +43,6 @@ class DecayChannel
 {
 
 public:
-    typedef std::vector<Particle*> DecayProducts;
-
     DecayChannel();
     DecayChannel(const DecayChannel&);
     virtual ~DecayChannel();
@@ -59,7 +58,7 @@ public:
     // Public methods
     // --------------------------------------------------------------------- //
 
-    virtual DecayProducts Decay(const Particle&) = 0;
+    virtual Secondaries Decay(const ParticleDef&, const DynamicData&) = 0;
 
     // ----------------------------------------------------------------------------
     /// @brief Boost the particle along a direction
@@ -76,7 +75,7 @@ public:
     /// @param gamma = E/m
     /// @param betagamma = beta*gamma = p/m
     // ----------------------------------------------------------------------------
-    static void Boost(Particle&, const Vector3D& direction, double gamma, double betagamma);
+    static void Boost(DynamicData&, const Vector3D& direction, double gamma, double betagamma);
 
     // ----------------------------------------------------------------------------
     /// @brief Boost a set of particles along a direction
@@ -89,7 +88,8 @@ public:
     /// @param gamma = E/m
     /// @param betagamma = beta*gamma = p/m
     // ----------------------------------------------------------------------------
-    static void Boost(DecayProducts&, const Vector3D& direction, double gamma, double betagamma);
+    /* static void Boost(const DecayProducts&, const Vector3D& direction, double gamma, double betagamma); */
+    static void Boost(Secondaries&, const Vector3D& direction, double gamma, double betagamma);
 
     // ----------------------------------------------------------------------------
     /// @brief Calculate the momentum in a two-body-phase-space decay
@@ -137,8 +137,6 @@ public:
 protected:
     virtual bool compare(const DecayChannel&) const = 0;
     virtual void print(std::ostream&) const {};
-
-    static void CopyParticleProperties(DecayProducts&, const Particle&);
 };
 
 std::ostream& operator<<(std::ostream&, PROPOSAL::DecayChannel const&);

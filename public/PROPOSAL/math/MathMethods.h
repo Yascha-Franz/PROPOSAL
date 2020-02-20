@@ -86,7 +86,7 @@ double dilog(double x);
 /// @return root of x
 
 double NewtonRaphson(std::function<double(double)> f, std::function<double(double)> df, double x1, double x2,
-        double xinit, int MAX_STEPS = 100, double xacc = 1.e-6);
+        double xinit, int MAX_STEPS = 101, double xacc = 1.e-6);
 
 struct SplineCoefficients{
     SplineCoefficients()
@@ -140,5 +140,7 @@ std::vector<SplineCoefficients> CalculateSpline(std::vector<double> x, std::vect
 
 
 std::pair<std::vector<double>, std::vector<double>> ParseSplineCoordinates(const std::string&);
+
+std::pair<double, double> welfords_online_algorithm(double& newValue, unsigned int& iter, double& mean, double& cov);
 
 } // namespace PROPOSAL

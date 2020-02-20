@@ -57,7 +57,7 @@ public:
     };
 
     typedef std::unordered_map<ParticleDef, PhaseSpaceParameters> ParameterMap;
-    typedef std::function<double(const Particle&, const DecayProducts&)> MatrixElementFunction;
+    typedef std::function<double(const DynamicData&, const std::vector<DynamicData>&)> MatrixElementFunction;
     typedef std::function<void(PhaseSpaceParameters&, const ParticleDef&)> EstimateFunction;
 
 public:
@@ -77,7 +77,7 @@ public:
     ///
     /// @return Vector of particles, the decay products
     // ----------------------------------------------------------------------------
-    DecayProducts Decay(const Particle&);
+    Secondaries Decay(const ParticleDef& p_def, const DynamicData& p_condition);
 
     // ----------------------------------------------------------------------------
     /// @brief Evalutate the matrix element of this channel
@@ -88,14 +88,14 @@ public:
     ///
     /// @return matrix element
     // ----------------------------------------------------------------------------
-    static double DefaultEvaluate(const Particle&, const DecayProducts&);
+    static double DefaultEvaluate(const DynamicData&, const std::vector<DynamicData>&);
 
     // ----------------------------------------------------------------------------
     /// @brief Evalutate the matrix element of this channel
     ///
     /// @return matrix element
     // ----------------------------------------------------------------------------
-    double Evaluate(const Particle&, const DecayProducts&);
+    double Evaluate(const DynamicData&, const std::vector<DynamicData>&);
 
     // ----------------------------------------------------------------------------
     /// @brief Sets the uniform flag
@@ -124,7 +124,7 @@ private:
     ///
     /// @return Vector of particles, the decay products
     // ----------------------------------------------------------------------------
-    double GenerateEvent(DecayProducts& products, const PhaseSpaceParameters&, const Particle&);
+    void GenerateEvent(std::vector<DynamicData>& products, const PhaseSpaceKinematics& kinematics);
 
     // ----------------------------------------------------------------------------
     /// @brief Calculate the normalization of the phase space density
@@ -133,7 +133,7 @@ private:
     ///
     /// @return \f$ \rho(\Phi) = \frac{{(M - \mu_n)}^{n-2}}{(n-2)!} \cdot \prod_{i=2}^{n} (2\pi P_i)~. \f$
     // ----------------------------------------------------------------------------
-    void CalculateNormalization(PhaseSpaceParameters&, double parent_mass);
+    double CalculateNormalization(double parent_mass);
 
     // ----------------------------------------------------------------------------
     /// @brief Calculate the maximum weight for the phase space
@@ -146,7 +146,7 @@ private:
     ///
     /// @return maximum weight
     // ----------------------------------------------------------------------------
-    void EstimateMaxWeight(PhaseSpaceParameters&, const ParticleDef& parent);
+    void EstimateMaxWeight(PhaseSpaceParameters&, const ParticleDef&);
 
     // ----------------------------------------------------------------------------
     /// @brief Calculate the maximum weight for the phase space
@@ -159,7 +159,7 @@ private:
     ///
     /// @return maximum weight
     // ----------------------------------------------------------------------------
-    void SampleEstimateMaxWeight(PhaseSpaceParameters&, const ParticleDef& parent);
+    void SampleEstimateMaxWeight(PhaseSpaceParameters&, const ParticleDef&);
 
     // ----------------------------------------------------------------------------
     /// @brief Calculate the normalization and maximum weight
@@ -171,7 +171,7 @@ private:
     ///
     /// @return struct containing the normalization and maximum weight
     // ----------------------------------------------------------------------------
-    PhaseSpaceParameters GetPhaseSpaceParams(const ParticleDef& parent);
+    PhaseSpaceParameters GetPhaseSpaceParams(const ParticleDef& parent_def);
 
 
     // ----------------------------------------------------------------------------

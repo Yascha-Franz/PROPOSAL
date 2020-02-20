@@ -18,7 +18,7 @@ using namespace PROPOSAL;
 Annihilation::Annihilation(const ParticleDef& particle_def,
                                  const Medium& medium,
                                  double multiplier)
-        : Parametrization(particle_def, medium, EnergyCutSettings(), multiplier)
+        : Parametrization(particle_def, medium, EnergyCutSettings(), multiplier, true)
 {
 }
 

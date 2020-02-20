@@ -30,6 +30,7 @@
 #pragma once
 
 #include <vector>
+#include <utility>
 
 #include "PROPOSAL/particle/Particle.h"
 
@@ -44,7 +45,7 @@ class Parametrization;
 class CrossSection
 {
 public:
-    CrossSection(const DynamicData::Type&, const Parametrization&);
+    CrossSection(const InteractionType&, const Parametrization&);
     CrossSection(const CrossSection&);
     virtual ~CrossSection();
 
@@ -68,15 +69,12 @@ public:
     // CalculateProducedParticles Return values:
     // First Parameter: List of produced particles by stochastic interaction (default: no particles, e.g. empty list)
     // Second parameter: Is the interaction a fatal interaction (e.g. will the initial particle vanish after interaction?)
-    virtual std::pair<std::vector<Particle*>, bool> CalculateProducedParticles(
-            double energy, double energy_loss, const Vector3D initial_direction){
-        (void)energy; (void)energy_loss; (void)initial_direction; return std::make_pair(std::vector<Particle*>(), false);
+    virtual std::pair<std::vector<DynamicData>, bool> CalculateProducedParticles(
+            double energy, double energy_loss, const Vector3D& initial_direction){
+        (void)energy; (void)energy_loss; (void)initial_direction; return std::make_pair(std::vector<DynamicData>(), false);
     }
 
-    virtual void StochasticDeflection(Particle* particle, double energy, double energy_loss){
-        // per default the particle is not deflected
-        (void)particle; (void) energy; (void) energy_loss;
-    }
+    virtual std::pair<double, double> StochasticDeflection(double energy, double energy_loss);
 
     virtual double CalculateCumulativeCrossSection(double energy, int component, double v) = 0;
 
@@ -84,7 +82,7 @@ public:
     // Getter
     // ----------------------------------------------------------------- //
 
-    DynamicData::Type GetTypeId() const { return type_id_; }
+    int GetTypeId() const { return static_cast<int>(type_id_); }
     Parametrization& GetParametrization() const { return *parametrization_; }
 
 protected:
@@ -102,7 +100,7 @@ protected:
     // Protected member
     // ----------------------------------------------------------------- //
 
-    const DynamicData::Type type_id_;
+    InteractionType type_id_;
 
     Parametrization* parametrization_;
 

@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include "PROPOSAL/Constants.h"
+#include "PROPOSAL/Secondaries.h"
 #include "PROPOSAL/decay/ManyBodyPhaseSpace.h"
 #include "PROPOSAL/math/RandomGenerator.h"
 #include "PROPOSAL/particle/Particle.h"
@@ -120,73 +121,72 @@ bool ManyBodyPhaseSpace::compare(const DecayChannel& channel) const
 }
 
 // ------------------------------------------------------------------------- //
-DecayChannel::DecayProducts ManyBodyPhaseSpace::Decay(const Particle& particle)
+Secondaries ManyBodyPhaseSpace::Decay(const ParticleDef& p_def, const DynamicData& p_condition)
 {
     // Create vector for decay products
-    DecayProducts products;
-    products.reserve(daughters_.size());
+    Secondaries products;
 
-    for (std::vector<const ParticleDef*>::const_iterator it = daughters_.begin(); it != daughters_.end(); ++it)
-    {
-        products.push_back(new Particle(**it));
+    for (auto p : daughters_) {
+        products.emplace_back(p->particle_type);
     }
 
     // prefactor for the phase space density
-    PhaseSpaceParameters params = GetPhaseSpaceParams(particle.GetParticleDef());
+    PhaseSpaceParameters params = GetPhaseSpaceParams(p_def);
+    PhaseSpaceKinematics kinematics;
 
     if (uniform_)
     {
-        double weight = 0.0;
-
+        double weight_ref;
+        double weight_sample;
         do
         {
-            weight = GenerateEvent(products, params, particle);
+            // precalculated kinematics
+            kinematics = CalculateKinematics(params.normalization, p_def.mass);
+            GenerateEvent(products.GetModifyableSecondaries(), kinematics);
+            // sample product states with rejection sampling
+            weight_ref = params.weight_min + RandomGenerator::Get().RandomDouble() * (params.weight_max - params.weight_min);
+            weight_sample = kinematics.weight * matrix_element_(p_condition, products.GetSecondaries());
 
-        } while(params.weight_min + RandomGenerator::Get().RandomDouble() * (params.weight_max - params.weight_min) > weight * matrix_element_(particle, products));
+        } while(weight_ref > weight_sample);
     }
     else
     {
-        GenerateEvent(products, params, particle);
+        // precalculated kinematics
+        kinematics = CalculateKinematics(params.normalization, p_def.mass);
+        GenerateEvent(products.GetModifyableSecondaries(), kinematics);
     }
 
     // Boost all products in Lab frame (the reason, why the boosting goes in the negative direction of the particle)
-    Boost(products, -particle.GetDirection(), particle.GetEnergy()/particle.GetMass(), particle.GetMomentum() / particle.GetMass());
-
-    CopyParticleProperties(products, particle);
+    Boost(products, -p_condition.GetDirection(), p_condition.GetEnergy()/p_def.mass, p_condition.GetMomentum() / p_def.mass);
 
     return products;
 }
 
 // ------------------------------------------------------------------------- //
-double ManyBodyPhaseSpace::GenerateEvent(DecayProducts& products, const PhaseSpaceParameters& params, const Particle& particle)
+void ManyBodyPhaseSpace::GenerateEvent(std::vector<DynamicData>& products, const PhaseSpaceKinematics& kinematics)
 {
-    double parent_mass = particle.GetMass();
-
-    // precalculated kinematics
-    PhaseSpaceKinematics kinematics = CalculateKinematics(params.normalization, parent_mass);
-
     // Calculate first momentum in R2
     Vector3D direction = GenerateRandomDirection();
 
-    products[1]->SetDirection(direction);
-    products[1]->SetMomentum(kinematics.momenta[0]);
+    products[1].SetDirection(direction);
+    products[1].SetMomentum(kinematics.momenta[0]);
 
     Vector3D opposite_direction = -direction;
     opposite_direction.CalculateSphericalCoordinates();
-    products[0]->SetDirection(opposite_direction);
-    products[0]->SetMomentum(kinematics.momenta[0]);
+    products[0].SetDirection(opposite_direction);
+    products[0].SetMomentum(kinematics.momenta[0]);
 
     // Correct the previous momenta
     for (unsigned int i = 2; i < daughter_masses_.size(); ++i)
     {
         double momentum = kinematics.momenta[i-1];
 
-        products[i]->SetDirection(GenerateRandomDirection());
-        products[i]->SetMomentum(momentum);
+        products[i].SetDirection(GenerateRandomDirection());
+        products[i].SetMomentum(momentum);
 
         // Boost previous particles to new frame
 
-        double M    = kinematics.virtual_masses[i - 1];
+        double M = kinematics.virtual_masses[i - 1];
         // double beta = momentum / std::sqrt(momentum * momentum + M * M);
         double gamma = std::sqrt(momentum * momentum + M * M) / M;
         double betagamma = momentum / M;
@@ -194,32 +194,30 @@ double ManyBodyPhaseSpace::GenerateEvent(DecayProducts& products, const PhaseSpa
         for (unsigned int s = 0; s < i; ++s)
         {
             // Boost in -p_i direction
-            Boost(*products[s], products[i]->GetDirection(), gamma, betagamma);
+            Boost(products[s], products[i].GetDirection(), gamma, betagamma);
         }
     }
-
-    return kinematics.weight;
 }
 
 // ------------------------------------------------------------------------- //
-double ManyBodyPhaseSpace::DefaultEvaluate(const Particle& particle, const ManyBodyPhaseSpace::DecayProducts& products)
+double ManyBodyPhaseSpace::DefaultEvaluate(const DynamicData& p_condition, const std::vector<DynamicData>& products)
 {
-    (void) particle;
+    (void) p_condition;
     (void) products;
 
     return 1.0;
 }
 
 // ------------------------------------------------------------------------- //
-double ManyBodyPhaseSpace::Evaluate(const Particle& particle, const ManyBodyPhaseSpace::DecayProducts& products)
+double ManyBodyPhaseSpace::Evaluate(const DynamicData& p_condition, const std::vector<DynamicData>& products)
 {
-    return matrix_element_(particle, products);
+    return matrix_element_(p_condition, products);
 }
 
 // ------------------------------------------------------------------------- //
-ManyBodyPhaseSpace::PhaseSpaceParameters ManyBodyPhaseSpace::GetPhaseSpaceParams(const ParticleDef& parent)
+ManyBodyPhaseSpace::PhaseSpaceParameters ManyBodyPhaseSpace::GetPhaseSpaceParams(const ParticleDef& parent_def)
 {
-    ParameterMap::iterator it = parameter_map_.find(parent);
+    ParameterMap::iterator it = parameter_map_.find(parent_def);
 
     if (it != parameter_map_.end())
     {
@@ -228,31 +226,31 @@ ManyBodyPhaseSpace::PhaseSpaceParameters ManyBodyPhaseSpace::GetPhaseSpaceParams
     {
         PhaseSpaceParameters params;
 
-        CalculateNormalization(params, parent.mass);
-        estimate_(params, parent);
+        params.normalization = CalculateNormalization(parent_def.mass);
+        estimate_(params, parent_def);
 
-        parameter_map_[parent] = params;
+        parameter_map_[parent_def] = params;
 
         return params;
     }
 }
 
 // ------------------------------------------------------------------------- //
-void ManyBodyPhaseSpace::CalculateNormalization(PhaseSpaceParameters& params, double parent_mass)
+double ManyBodyPhaseSpace::CalculateNormalization(double parent_mass)
 {
     // For mario: n! = Gamma(n + 1)
     double normalization = std::pow(parent_mass - sum_daughter_masses_, number_of_daughters_ - 2) /
                            std::tgamma(number_of_daughters_ - 2.0 + 1.0) *
                            std::pow(2.0 * PI, number_of_daughters_ - 1.0);
 
-    params.normalization = normalization /= 2.0 * parent_mass;
+    return normalization / (2.0 * parent_mass);
 }
 
 // ------------------------------------------------------------------------- //
-void ManyBodyPhaseSpace::EstimateMaxWeight(PhaseSpaceParameters& params, const ParticleDef& parent)
+void ManyBodyPhaseSpace::EstimateMaxWeight(PhaseSpaceParameters& params, const ParticleDef& parent_def)
 {
     double weight = 1.0;
-    double E_max = parent.mass - sum_daughter_masses_ + daughter_masses_[0];
+    double E_max = parent_def.mass - sum_daughter_masses_ + daughter_masses_[0];
     double E_min = 0.0;
 
     for (int i = 1; i < number_of_daughters_; ++i)
@@ -267,42 +265,37 @@ void ManyBodyPhaseSpace::EstimateMaxWeight(PhaseSpaceParameters& params, const P
 }
 
 // ------------------------------------------------------------------------- //
-void ManyBodyPhaseSpace::SampleEstimateMaxWeight(PhaseSpaceParameters& params, const ParticleDef& parent)
+void ManyBodyPhaseSpace::SampleEstimateMaxWeight(PhaseSpaceParameters& params, const ParticleDef& parent_def)
 {
     // Create vector for decay products
-    DecayProducts products;
-    products.reserve(daughters_.size());
+    Secondaries products;
 
-    for (std::vector<const ParticleDef*>::const_iterator it = daughters_.begin(); it != daughters_.end(); ++it)
-    {
-        products.push_back(new Particle(**it));
+    for (auto d : daughters_) {
+        products.emplace_back(d->particle_type);
     }
 
-    Particle particle(parent);
-
     // precalculated kinematics
-    PhaseSpaceKinematics kinematics = CalculateKinematics(params.normalization, parent.mass);
+    PhaseSpaceKinematics kinematics;
+    DynamicData particle(parent_def.particle_type);
+    particle.SetEnergy(parent_def.mass);
 
     double result = 0.0;
 
     for (int i = 0; i < broad_phase_statistic_; ++i)
     {
-        result = GenerateEvent(products, params, particle) * matrix_element_(particle, products);
+        kinematics = CalculateKinematics(params.normalization, parent_def.mass);
+        GenerateEvent(products.GetModifyableSecondaries(), kinematics);
+        result = kinematics.weight * matrix_element_(particle, products.GetSecondaries());
 
         if (result < params.weight_min)
         {
-            params.weight_min = result;
+            params.weight_min = result; // the lower limit is at the edge of the phase space, which is zero, or?
         }
 
         if (result > params.weight_max)
         {
             params.weight_max = result;
         }
-    }
-
-    for (DecayProducts::const_iterator it = products.begin(); it != products.end(); ++it)
-    {
-        delete *it;
     }
 }
 

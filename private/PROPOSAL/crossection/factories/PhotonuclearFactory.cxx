@@ -28,6 +28,7 @@ PhotonuclearFactory::PhotonuclearFactory()
     RegisterShadowEffect(
         "shadowduttarenosarcevicseckel", ShadowDuttaRenoSarcevicSeckel, &ShadowDuttaRenoSarcevicSeckel::create);
     RegisterShadowEffect("shadowbutkevichmikhailov", ShadowButkevichMikhailov, &ShadowButkevichMikhailov::create);
+    RegisterShadowEffect("shadownone", ShadowNone, nullptr);
 
     RegisterRealPhoton("photozeus", Zeus, &PhotoZeus::create);
     RegisterRealPhoton("photobezrukovbugaev", BezrukovBugaev, &PhotoBezrukovBugaev::create);

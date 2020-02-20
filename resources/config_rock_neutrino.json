@@ -19,7 +19,7 @@
         "epair" : "None",
         "ioniz" : "None",
 		"photo" : "None",
-		"phot_shadow" : "None",
+		"photo_shadow" : "ShadowNone",
 		"scattering" : "NoScattering",
         
 		"weak" : "WeakCooperSarkarMertsch",
@@ -27,19 +27,19 @@
 
 		"cuts_infront":
 		{
-			"e_cut": -1,
+			"e_cut": 500,
 			"v_cut": -1,
 			"cont_rand": false
 		},
 		"cuts_inside":
 		{
-			"e_cut": -1,
+			"e_cut": 500,
 			"v_cut": -1,
 			"cont_rand": false
 		},
 		"cuts_behind":
 		{
-			"e_cut": -1,
+			"e_cut": 500,
 			"v_cut": -1,
 			"cont_rand": false
 		}

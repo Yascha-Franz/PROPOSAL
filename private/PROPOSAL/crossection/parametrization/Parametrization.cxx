@@ -14,13 +14,15 @@ using namespace PROPOSAL;
 Parametrization::Parametrization(const ParticleDef& particle_def,
                                  const Medium& medium,
                                  const EnergyCutSettings& cuts,
-                                 double multiplier)
+                                 double multiplier,
+                                 bool fatal)
     : particle_def_(particle_def),
       medium_(medium.clone()),
       cut_settings_(cuts),
       components_(medium_->GetComponents()),
       component_index_(0),
-      multiplier_(multiplier) {}
+      multiplier_(multiplier),
+      fatal_(fatal) {}
 
 Parametrization::Parametrization(const Parametrization& param)
     : particle_def_(param.particle_def_),
@@ -30,7 +32,8 @@ Parametrization::Parametrization(const Parametrization& param)
       component_index_(param.component_index_)  // //TODO(mario): Check better
                                                 // way Mon 2017/09/04
       ,
-      multiplier_(param.multiplier_) {}
+      multiplier_(param.multiplier_),
+      fatal_(param.fatal_) {}
 
 Parametrization::~Parametrization() {
     delete medium_;

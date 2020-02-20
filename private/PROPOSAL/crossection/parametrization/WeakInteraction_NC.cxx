@@ -21,7 +21,7 @@ using namespace PROPOSAL;
 WeakInteraction_NC::WeakInteraction_NC(const ParticleDef& particle_def,
                                  const Medium& medium,
                                  double multiplier)
-        : Parametrization(particle_def, medium, EnergyCutSettings(), multiplier)
+        : Parametrization(particle_def, medium, EnergyCutSettings(), multiplier, false)
 {
 }
 
@@ -66,6 +66,19 @@ size_t WeakInteraction_NC::GetHash() const
 // ------------------------------------------------------------------------- //
 // Specific implementations
 // ------------------------------------------------------------------------- //
+double WeakInteraction_NC::GetWeakPartnerCharge(const ParticleDef& particle_def){
+    if(particle_def.weak_partner == static_cast<int>(ParticleType::None)){
+        log_fatal("WeakPartner not defined for particle %s.", particle_def.name.c_str());
+        return 0; //To avoid warnings
+    }
+    else{
+        std::map<const int,const ParticleDef&>::iterator it = Id_Particle_Map.find(particle_def.weak_partner);
+        if(it->first == particle_def.weak_partner)
+            return (it->second).charge;
+        log_fatal("WeakPartner (Id: %s) is not defined in PROPOSAL", particle_def.weak_partner);
+        return 0; //To avoid warnings
+    }
+}
 
 WeakCooperSarkarMertsch_NC::WeakCooperSarkarMertsch_NC(const ParticleDef& particle_def,
                                                  const Medium& medium,
@@ -73,13 +86,13 @@ WeakCooperSarkarMertsch_NC::WeakCooperSarkarMertsch_NC(const ParticleDef& partic
         : WeakInteraction_NC(particle_def, medium, multiplier)
         , interpolant_(2, NULL)
 {
-    if(particle_def.charge < 0.|| particle_def.GetWeakPartner()->charge > 0.)
+    if(particle_def.charge < 0.|| GetWeakPartnerCharge(particle_def) > 0.)
     {
         // Initialize interpolant for particles (remember crossing symmetry rules)
         interpolant_[0] = new Interpolant(energies, y_nubar_p_NC, sigma_nubar_p_NC, IROMB, false, false, IROMB, false, false);
         interpolant_[1] = new Interpolant(energies, y_nubar_n_NC, sigma_nubar_n_NC, IROMB, false, false, IROMB, false, false);
     }
-    else if(particle_def.charge > 0.|| particle_def.GetWeakPartner()->charge < 0.){
+    else if(particle_def.charge > 0.|| GetWeakPartnerCharge(particle_def) < 0.){
         // Initialize interpolant for antiparticles (remember crossing symmetry rules)
         interpolant_[0] = new Interpolant(energies, y_nu_p_NC, sigma_nu_p_NC, IROMB, false, false, IROMB, false, false);
         interpolant_[1] = new Interpolant(energies, y_nu_n_NC, sigma_nu_n_NC, IROMB, false, false, IROMB, false, false);
