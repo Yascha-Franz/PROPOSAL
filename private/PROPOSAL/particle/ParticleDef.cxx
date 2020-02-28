@@ -465,7 +465,7 @@ NuEDef::NuEDef()
     : ParticleDef(
         "NuE",
         0.0,
-        1e-8,
+        1,
         STABLE_PARTICLE,
         0.0,
         HardComponentTables::EmptyTable,
@@ -481,7 +481,7 @@ NuEBarDef::NuEBarDef()
     : ParticleDef(
         "NuEBar",
         0.0,
-        1e-8,
+        1,
         STABLE_PARTICLE,
         0.0,
         HardComponentTables::EmptyTable,
@@ -497,7 +497,7 @@ NuMuDef::NuMuDef()
     : ParticleDef(
         "NuMu",
         0.0,
-        1e-8,
+        1,
         STABLE_PARTICLE,
         0.0,
         HardComponentTables::EmptyTable,
@@ -513,7 +513,7 @@ NuMuBarDef::NuMuBarDef()
     : ParticleDef(
         "NuMuBar",
         0.0,
-        1e-8,
+        1,
         STABLE_PARTICLE,
         0.0,
         HardComponentTables::EmptyTable,
@@ -529,7 +529,7 @@ NuTauDef::NuTauDef()
     : ParticleDef(
         "NuTau",
         0.0,
-        1e-8,
+        1,
         STABLE_PARTICLE,
         0.0,
         HardComponentTables::EmptyTable,
@@ -545,7 +545,7 @@ NuTauBarDef::NuTauBarDef()
     : ParticleDef(
         "NuTauBar",
         0.0,
-        1e-8,
+        1,
         STABLE_PARTICLE,
         0.0,
         HardComponentTables::EmptyTable,

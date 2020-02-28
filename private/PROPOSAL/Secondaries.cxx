@@ -97,10 +97,11 @@ void Secondaries::DoDecay()
 {
     for (auto it = secondaries_.begin(); it != secondaries_.end();) {
         if (it->GetTypeId() == static_cast<int>(InteractionType::Decay)) {
+            DynamicData decaying_particle(primary_def_->particle_type, it->GetPosition(), it->GetDirection(), it->GetEnergy(), it->GetParentParticleEnergy(), it->GetTime(), it->GetPropagatedDistance());
             double random_ch = RandomGenerator::Get().RandomDouble();
             Secondaries products
                 = primary_def_->decay_table.SelectChannel(random_ch).Decay(
-                    *primary_def_, *it);
+                    *primary_def_, decaying_particle);
             it = secondaries_.erase(it); // delete old decay
             for (auto p : products.GetSecondaries()) {
                 // and insert decayparticles inplace of old decay
